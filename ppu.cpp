@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <array>
 #include "h.cpp"
 //using namespace std;
 
@@ -260,6 +261,56 @@ void render::render_splite(){
 	}
 }
 
+void render::render_scanline(){
+	if(lcdc & 0x1 > 0){
+		render_bg();
+	}
+	if(lcdc & 0x2 > 0){
+		render_splite();
+	}
+
+	for(int x = 0; x < screen_width; x++){
+		int ix = x + ly * screen_width;
+		frame_buffer[ix] = scanline[x];
+	}
+}
+
+std::array<int, screen_width * screen_height> render::exe_frame_buffer(){
+	return frame_buffer;
+}
+
+void render::check_lyc_interrupt(){
+	if(ly == lyc){
+		stat |= 0x4;
+		if(stat & 0x40 > 0){
+			irq_lcdc = true;
+		}
+	}else{
+		stat &= !0x4;
+	}
+}
+
+void render::check_lcdmode_interrupt(){
+	switch(stat & 0x3){
+		case 0: //H-Blank interrupt
+			if(stat & 0x8 > 0){
+				irq_lcdc = true;
+			}
+			break;
+		case 1: //V-Blank interrupt
+			if(stat & 0x10 > 0){
+				irq_lcdc = true;
+			}
+			break;
+		case 2: //OAM Search interrupt
+			if(stat & 0x20 > 0){
+				irq_lcdc = true;
+			}
+			break;
+		default:
+			break;
+	}
+}
 
 
 int main(){
@@ -271,5 +322,4 @@ int main(){
 	//std::tie(a,b) = render.fetch_tile(80, 0, false);
 	std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
 	std::cout << a << ", " << b << std::endl;
-
 }

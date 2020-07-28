@@ -34,8 +34,8 @@ public:
     bool irq_vblank;
     bool irq_lcdc;
     int counter;
-    int frame_buffer[screen_width * screen_height];
-    int scanline[screen_width];
+    std::array<int,screen_width * screen_height> frame_buffer;
+    std::array<int,screen_width> scanline;
     // BGPriority bg_prio = screen_width;
     std::string bg_prio[screen_width];
 
@@ -46,5 +46,10 @@ public:
 	std::tuple<int, int> fetch_window_tile(int tile_x, int tile_y, int offset_y);
 	void render_bg();
 	void render_splite();
+    void render_scanline();
+    std::array<int, screen_width * screen_height> exe_frame_buffer();
+    void check_lyc_interrupt();
+    void check_lcdmode_interrupt();
+
 
 };

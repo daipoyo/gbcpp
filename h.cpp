@@ -50,6 +50,8 @@ public:
     std::array<int, screen_width * screen_height> exe_frame_buffer();
     void check_lyc_interrupt();
     void check_lcdmode_interrupt();
-
+    void write(int addr, int val);
+    void read(int addr, int val);
+    void update(int tick);
 
 };

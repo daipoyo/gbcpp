@@ -312,6 +312,37 @@ void render::check_lcdmode_interrupt(){
 	}
 }
 
+void render::write(int addr, int val){
+	if(0x8000 <= addr >= 0x9FFF){
+		if(stat & 0x3 != 3){
+			VRAM[(addr & 0x1fff)] = val;
+		}
+	}
+
+	if(0xfe00 <= addr >= 0xfe9f){
+		if(stat & 0x3 == 0 || stat & 0x3 == 1){
+			OAM[(addr & 0x00ff)] = val;
+		}
+	}
+
+	if(addr = 0xff40){
+		if(lcdc & 0x80 != val & 0x80){
+			ly = 0;
+			counter = 0;
+
+			int mode;
+			if(val & 0x80 > 0){
+				mode = 2;	
+			}else{
+				mode = 0;
+			}
+			stat = (stat & 0xf8) | mode;
+			check_lcdmode_interrupt();
+		}
+		lcdc = val;
+	}
+}
+
 
 int main(){
 	read_rom rom;
@@ -320,6 +351,11 @@ int main(){
 	rom.fetch(filename);
 	int a, b;
 	//std::tie(a,b) = render.fetch_tile(80, 0, false);
-	std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
-	std::cout << a << ", " << b << std::endl;
+	//std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
+	//std::cout << a << ", " << b << std::endl;
+	int c = 3;
+	if(0 <= c){
+		printf("AAA");
+		std::cout << "!!!" << std::endl;
+	}
 }

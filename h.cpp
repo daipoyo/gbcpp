@@ -51,7 +51,7 @@ public:
     void check_lyc_interrupt();
     void check_lcdmode_interrupt();
     void write(int addr, int val);
-    void read(int addr, int val);
+    int read(int addr);
     void update(int tick);
 
 };

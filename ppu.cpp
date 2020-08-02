@@ -313,11 +313,11 @@ void render::check_lcdmode_interrupt(){
 }
 
 void render::write(int addr, int val){
-	if(0x8000 <= addr >= 0x9FFF){
+	if(0x8000 <= addr <= 0x9FFF){
 		if(stat & 0x3 != 3){
 			VRAM[(addr & 0x1fff)] = val;
 		}
-	}else if(0xfe00 <= addr >= 0xfe9f){
+	}else if(0xfe00 <= addr <= 0xfe9f){
 		if(stat & 0x3 == 0 || stat & 0x3 == 1){
 			OAM[(addr & 0x00ff)] = val;
 		}
@@ -342,19 +342,19 @@ void render::write(int addr, int val){
 int render::read(int addr){
 	int temp;
 
-	if(0x8000 <= addr >= 0x9FFF){
+	if(0x8000 <= addr <= 0x9FFF){
 		if(stat & 0x3 != 3){
 			VRAM[addr & 0x1fff];
 		}else{
 			temp = 0xff;
 		}
-	}else if(0xfe00 <= addr >= 0xfe9f){
+	}else if(0xfe00 <= addr <= 0xfe9f){
 		if(stat & 0x3 == 0 || stat & 0x3 == 1){
 			OAM[(addr & 0x00ff)];
 		}else{
 			temp =  0xff;
 		}
-	}else if(0xff40 <= addr >= 0xff4b){
+	}else if(0xff40 <= addr <= 0xff4b){
 		switch(addr & 0x1){
 			case 0:
 				temp =  lcdc;
@@ -397,6 +397,55 @@ int render::read(int addr){
 	return temp;
 }
 
+void render::update(int tick){
+	if(lcdc & 0x80 == 0){
+		return;
+	}
+
+	counter += tick;
+
+	//OAM Search (80 clocks)
+	if(stat & 0x3 == 2){
+		if(counter >= 80){
+			counter -= 80;
+			stat = (stat & 0xf8) | 3;
+			render_scanline();
+		}
+	//Pixel Transfer (172 clocks)
+	}else if(stat & 0x3 == 3){
+		if(counter >= 172){
+			counter -= 172;
+			stat = (stat & 0xf8);
+			check_lcdmode_interrupt();
+		}
+	// H-Blank (204 clocks)
+	}else if(stat & 0x3 == 0){
+		if(counter >= 204){
+			counter -= 204;
+			ly += 1;
+			if(ly >= screen_height){
+				stat = (stat & 0xf8) | 1;
+				irq_vblank = true;
+			}else{
+				stat = (stat & 0xf8) | 2;
+			}
+			check_lyc_interrupt();
+			check_lcdmode_interrupt();
+		}
+	// V-Blank (4560 clocks or 10 lines)
+	}else{ // = 1 | _
+		if(counter >= 456){
+			counter -= 456;
+			ly += 1;
+			if(ly >= 154){
+				stat = (stat & 0xf8) | 2;
+				ly = 0;
+				check_lcdmode_interrupt();
+			}
+			check_lyc_interrupt();
+		}
+	}
+}
 
 
 int main(){
@@ -408,9 +457,8 @@ int main(){
 	//std::tie(a,b) = render.fetch_tile(80, 0, false);
 	//std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
 	//std::cout << a << ", " << b << std::endl;
-	int c = 3;
-	if(0 <= c){
+	int c = 2;
+	if(3 <= c){
 		printf("AAA");
-		std::cout << "!!!" << std::endl;
 	}
 }

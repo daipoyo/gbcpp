@@ -55,3 +55,21 @@ public:
     void update(int tick);
 
 };
+
+
+class cpu{
+public:
+    int pc = 0x100;
+    int sp = 0;
+    int a = 0;
+    int f = 0;
+    int b = 0;
+    int c = 0;
+    int d = 0;
+    int e = 0;
+    int h = 0;
+    int l = 0;
+    bool ime = false;
+    int tick = 0;
+    bool halted = 0;
+};

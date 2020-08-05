@@ -99,7 +99,7 @@ bool f_c(){
 }
 
 //Convert 8-bit register index to name
-std:string reg_to_string(idx){
+std::string reg_to_string(int idx){
 	switch(idx){
 		case 0:
 			return "B";
@@ -125,6 +125,100 @@ std:string reg_to_string(idx){
 		case 7:
 			return "A";
 			break;
-
+		default:
+			printf("Invalid Operand index %d", idx);
+			break;
 	}
 }
+
+//Convert 16-bit register index to name
+std::string reg16_to_string(int idx){
+	switch(idx){
+		case 0:
+			return "BC";
+			break;
+		case 1:
+			return "DE";
+			break;
+		case 2:
+			return "HL";
+			break;
+		case 3:
+			return "SP";
+			break;
+		default:
+			printf("Invalid Operand index %d", idx);
+			break;
+	}
+}
+
+
+
+//Write 8-bit operand
+void write_r8(int idx, int val){
+	switch(idx){
+		case 0:
+			b = val;
+			break;
+		case 1:
+			c = val;
+			break;
+		case 2:
+			d = val;
+			break;
+		case 3:
+			e = val;
+			break;
+		case 4:
+			h = val;
+			break;
+		case 5:
+			l = val;
+			break;
+		case 6:
+			hl = hl();
+			write_mem8(hl, val);
+			break;
+		case 7:
+			a = val;
+			break;
+		default:
+			printf("Invalid Operand index %d", idx);
+			break;
+	}
+}
+
+//Read 8-bit operand
+int read_r8(int idx){
+	switch(idx){
+		case 0:
+			return b;
+			break;
+		case 1:
+			return c;
+			break;
+		case 2:
+			return d;
+			break;
+		case 3:
+			return e;
+			break;
+		case 4:
+			return h;
+			break;
+		case 5:
+			return l;
+			break;
+		case 6:
+			hl = hl();
+			read_mem8(hl);
+		case 7:
+			return a;
+			break;
+		default:
+			printf("Invalid Operand index %d", idx);
+			break;
+	}
+}
+
+

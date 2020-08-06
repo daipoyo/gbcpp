@@ -221,4 +221,88 @@ int read_r8(int idx){
 	}
 }
 
+//Write 16-bit operand
+void write_r16(int idx, int val){
+	switch(idx){
+		case 0:
+			set_bc(val);
+			break;
+		case 1:
+			set_de(val);
+			break;
+		case 2:
+			set_hl(val);
+			break;
+		case 3:
+			sp = val;
+			break;
+		default:
+			printf("Invalid Operand index %d", idx);
+			break;
+	}
+}
+
+//Read 16-bit operand
+int read_r16(int idx){
+	switch(idx){
+		case 0:
+			return bc();
+			break;
+		case 1:
+			return de();
+			break;
+		case 2:
+			return hl();
+			break;
+		case 3:
+			return sp;
+			break;
+		default:
+			printf("Invalid Operand Index %d", idx);
+	}
+}
+
+//Read 16-bit immediate from memory
+int read_d16(){
+	int imm = read_mem16(pc);
+	pc = pc + 2;
+
+	return imm;
+}
+
+//Checks branch condition
+bool cc(int idx){
+	switch(idx){
+		case 0:
+			return !f_z();
+		case 1:
+			return f_z();
+		case 2:
+			return !f_c();
+		case 3:
+			return f_c();
+		default:
+			printf("Invalid Operand index %d", idx);
+	}
+}
+
+//Convert branch condition to name
+std::string cc_to_string(int idx){
+	switch(idx){
+		case 0:
+			return "NZ";
+			break;
+		case 1:
+			return "Z";
+			break;
+		case 2:
+			return "NC";
+			break;
+		case 3:
+			return "C";
+			break;
+		default:
+			printf("Invalid branch condition index %d", idx);
+	}
+}
 

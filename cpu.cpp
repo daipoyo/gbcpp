@@ -306,3 +306,33 @@ std::string cc_to_string(int idx){
 	}
 }
 
+
+//Write 8-bit value to memory
+void write_mem8(int addr, int val){
+	write(addr, val);
+
+	tick = tick + 4;
+}
+
+//read 8-bit value from memory
+int read_mem8(int addr){
+	int ret = read(addr);
+
+	tick = tick + 4;
+	return ret;
+}
+
+//Write 16-bit value to memory
+void write_mem16(int addr, int val){
+	write_mem8(addr, val & 0xff);
+	write_mem8(addr + 1, val >> 8);
+}
+
+//Read 16-bit value from memory
+int read_mem16(int addr){
+	int lo = read_mem8(addr);
+	int hi = read_mem8(addr + 1);
+
+	return hi << 8 | lo;
+}
+

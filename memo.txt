@@ -1,2 +1,1 @@
-read_mem8
-write_mem8
+write

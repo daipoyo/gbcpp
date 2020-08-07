@@ -73,3 +73,10 @@ public:
     int tick = 0;
     bool halted = 0;
 };
+
+class mmu{
+public:
+    int ram[0x2000];
+    int hram[0x7f];
+
+};

@@ -1,54 +1,60 @@
+#include <string>
+#include "h.cpp"
+#include "mmu.cpp"
+
+
+
 //Read AF register
-int af(){
+int cpu::af(){
 	return a << 8 | f;
 }
 
 //Wrtie AF register
-void set_af(int val){
+void cpu::set_af(int val){
 	a = (val >> 8) & 0xff;
 	f = val & 0xff;
 }
 
 //Read BC register
-int bc(){
+int cpu::bc(){
 	return b << 8 | c;
 }
 
 //Write BC register
-void set_bc(val){
+void cpu::set_bc(val){
 	b = (val >> 8 ) & 0xff;
 	c = val & 0xff;
 }
 
 //Read DE register
-int de(){
+int cpu::de(){
 	return d << 8 | e;
 }
 
 //Write DE register
-void set_de(){
+void cpu::set_de(){
 	d = (val >> 8) & 0xff;
 	e = val & 0xff;
 }
 
 //Read HL register
-int hl(){
+int cpu::hl(){
 	return h << 8 | l;
 }
 
 //Write HL register
-void set_hl(){
+void cpu::set_hl(){
 	h = (val >> 8) & 0xff;
 	l = val & 0xff;
 }
 
 //Set Z flag
-void set_f_z(bool z){
+void cpu::set_f_z(bool z){
 	f = (f & !(1 << 7)) | z << 7; //if z==true -> z = 1 else if z==false ->z = 0;
 }
 
 //Return Z flag
-bool f_z(){
+bool cpu::f_z(){
 	if((f >> 7) & 1 == 1){
 		return true;
 	}else{
@@ -57,12 +63,12 @@ bool f_z(){
 }
 
 //Set N flag
-void set_f_n(bool n){
+void cpu::set_f_n(bool n){
 	f = (f & !(1 << 6)) | n << 6;
 }
 
 //Return N flag
-bool f_n(){
+bool cpu::f_n(){
 	if((f >> 6) & 1 == 1){
 		return true;
 	}else{
@@ -71,12 +77,12 @@ bool f_n(){
 }
 
 //Set H flag
-void set_f_h(bool h){
+void cpu::set_f_h(bool h){
 	f = (f & !(1 << 5)) | n << 5;
 }
 
 //Return H flag
-bool f_h(){
+bool cpu::f_h(){
 	if((f >> 5) & 1 == 1){
 		return true;
 	}else{
@@ -85,12 +91,12 @@ bool f_h(){
 }
 
 //Set C flag
-void set_f_c(bool c){
+void cpu::set_f_c(bool c){
 	f = (f & !(1 << 4)) | c << 4;
 }
 
 //Return C flag
-bool f_c(){
+bool cpu::f_c(){
 	if((f >> 4) & 1 == 1){
 		return true;
 	}else{
@@ -99,7 +105,7 @@ bool f_c(){
 }
 
 //Convert 8-bit register index to name
-std::string reg_to_string(int idx){
+std::string cpu::reg_to_string(int idx){
 	switch(idx){
 		case 0:
 			return "B";
@@ -132,7 +138,7 @@ std::string reg_to_string(int idx){
 }
 
 //Convert 16-bit register index to name
-std::string reg16_to_string(int idx){
+std::string cpu::reg16_to_string(int idx){
 	switch(idx){
 		case 0:
 			return "BC";
@@ -155,7 +161,7 @@ std::string reg16_to_string(int idx){
 
 
 //Write 8-bit operand
-void write_r8(int idx, int val){
+void cpu::write_r8(int idx, int val){
 	switch(idx){
 		case 0:
 			b = val;
@@ -189,7 +195,7 @@ void write_r8(int idx, int val){
 }
 
 //Read 8-bit operand
-int read_r8(int idx){
+int cpu::read_r8(int idx){
 	switch(idx){
 		case 0:
 			return b;
@@ -222,7 +228,7 @@ int read_r8(int idx){
 }
 
 //Write 16-bit operand
-void write_r16(int idx, int val){
+void cpu::write_r16(int idx, int val){
 	switch(idx){
 		case 0:
 			set_bc(val);
@@ -243,7 +249,7 @@ void write_r16(int idx, int val){
 }
 
 //Read 16-bit operand
-int read_r16(int idx){
+int cpu::read_r16(int idx){
 	switch(idx){
 		case 0:
 			return bc();
@@ -263,7 +269,7 @@ int read_r16(int idx){
 }
 
 //Read 16-bit immediate from memory
-int read_d16(){
+int cpu::read_d16(){
 	int imm = read_mem16(pc);
 	pc = pc + 2;
 
@@ -271,7 +277,7 @@ int read_d16(){
 }
 
 //Checks branch condition
-bool cc(int idx){
+bool cpu::cc(int idx){
 	switch(idx){
 		case 0:
 			return !f_z();
@@ -287,7 +293,7 @@ bool cc(int idx){
 }
 
 //Convert branch condition to name
-std::string cc_to_string(int idx){
+std::string cpu::cc_to_string(int idx){
 	switch(idx){
 		case 0:
 			return "NZ";
@@ -308,14 +314,14 @@ std::string cc_to_string(int idx){
 
 
 //Write 8-bit value to memory
-void write_mem8(int addr, int val){
+void cpu::write_mem8(int addr, int val){
 	write(addr, val);
 
 	tick = tick + 4;
 }
 
 //read 8-bit value from memory
-int read_mem8(int addr){
+int cpu::read_mem8(int addr){
 	int ret = read(addr);
 
 	tick = tick + 4;
@@ -323,13 +329,13 @@ int read_mem8(int addr){
 }
 
 //Write 16-bit value to memory
-void write_mem16(int addr, int val){
+void cpu::write_mem16(int addr, int val){
 	write_mem8(addr, val & 0xff);
 	write_mem8(addr + 1, val >> 8);
 }
 
 //Read 16-bit value from memory
-int read_mem16(int addr){
+int cpu::read_mem16(int addr){
 	int lo = read_mem8(addr);
 	int hi = read_mem8(addr + 1);
 

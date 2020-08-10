@@ -78,5 +78,10 @@ class mmu{
 public:
     int ram[0x2000];
     int hram[0x7f];
+    int int_flag;
+    int int_enable;
+
+    void write(int addr, int val);
+    int read(int addr);
 
 };

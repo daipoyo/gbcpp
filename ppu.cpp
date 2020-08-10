@@ -179,7 +179,7 @@ void render::render_splite(){
 	if(lcdc & 0x4 > 0){
 		height = 16;
 	}else{
-		8;
+		height = 8;
 	}
 
 	for(int i = 0; i < 40; i++){

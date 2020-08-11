@@ -2,7 +2,7 @@
 #include "h.cpp"
 #include "mmu.cpp"
 
-
+mmu mmu;
 
 //Read AF register
 int cpu::af(){
@@ -21,7 +21,7 @@ int cpu::bc(){
 }
 
 //Write BC register
-void cpu::set_bc(val){
+void cpu::set_bc(int val){
 	b = (val >> 8 ) & 0xff;
 	c = val & 0xff;
 }
@@ -32,7 +32,7 @@ int cpu::de(){
 }
 
 //Write DE register
-void cpu::set_de(){
+void cpu::set_de(int val){
 	d = (val >> 8) & 0xff;
 	e = val & 0xff;
 }
@@ -43,7 +43,7 @@ int cpu::hl(){
 }
 
 //Write HL register
-void cpu::set_hl(){
+void cpu::set_hl(int val){
 	h = (val >> 8) & 0xff;
 	l = val & 0xff;
 }
@@ -78,7 +78,7 @@ bool cpu::f_n(){
 
 //Set H flag
 void cpu::set_f_h(bool h){
-	f = (f & !(1 << 5)) | n << 5;
+	f = (f & !(1 << 5)) | h << 5;
 }
 
 //Return H flag
@@ -181,10 +181,11 @@ void cpu::write_r8(int idx, int val){
 		case 5:
 			l = val;
 			break;
-		case 6:
-			hl = hl();
-			write_mem8(hl, val);
+		case 6:{
+			int hl_val = hl();
+			write_mem8(hl_val, val);
 			break;
+		}
 		case 7:
 			a = val;
 			break;
@@ -215,9 +216,11 @@ int cpu::read_r8(int idx){
 		case 5:
 			return l;
 			break;
-		case 6:
-			hl = hl();
-			read_mem8(hl);
+		case 6:{
+			int hl_val = hl();
+			read_mem8(hl_val);
+			break;
+		}
 		case 7:
 			return a;
 			break;
@@ -267,6 +270,14 @@ int cpu::read_r16(int idx){
 			printf("Invalid Operand Index %d", idx);
 	}
 }
+//Read 8-bit immediate from memory
+char cpu::read_d8(){
+	int pc = pc;
+	int imm = read_mem8(pc);
+	pc = pc + 1;
+
+	return imm;
+}
 
 //Read 16-bit immediate from memory
 int cpu::read_d16(){
@@ -315,14 +326,14 @@ std::string cpu::cc_to_string(int idx){
 
 //Write 8-bit value to memory
 void cpu::write_mem8(int addr, int val){
-	write(addr, val);
+	mmu.write(addr, val);
 
 	tick = tick + 4;
 }
 
 //read 8-bit value from memory
 int cpu::read_mem8(int addr){
-	int ret = read(addr);
+	int ret = mmu.read(addr);
 
 	tick = tick + 4;
 	return ret;
@@ -342,3 +353,215 @@ int cpu::read_mem16(int addr){
 	return hi << 8 | lo;
 }
 
+//NOP
+void nop(){
+	printf("NOP");
+}
+
+//LD r16, d16
+void cpu::ld_r16_d16(int reg){
+	int val = read_d16();
+
+	printf("LD %d %d", reg, val);
+	
+	write_r16(reg, val);
+}
+
+//LD (d16), SP
+void cpu::ld_ind_d16_sp(){
+	int addr = read_d16();
+	int sp = sp;
+
+	printf("LD %d SP", addr);
+
+	write_mem16(addr, sp);
+}
+
+//LD SP, HL
+void cpu::ld_sp_hl(){
+	printf("LD SP, HL");
+
+	tick = tick + 4;
+
+	sp = hl();
+}
+
+//ADD HL, r16
+void cpu::add_hl_r16(int reg){
+	printf("ADD HL %d" ,reg);
+
+	int hl_val = hl();
+	int val = read_r16(reg);
+
+	bool half_carry = (hl_val & 0xFFF) + (val & 0xFFF) > 0xFFF;
+	int res = hl_val + val;
+	bool carry = res;  //tuple!!
+	set_hl(res);
+
+	tick = tick + 4;
+
+	set_f_n(false);
+	set_f_h(half_carry);
+	set_f_c(carry);
+}
+
+int cpu::add_sp(char offset){
+	int val = offset;
+
+	bool half_carry = (sp & 0x0F) + (val & 0x0F) > 0x0F;
+	bool carry = (sp & 0xFF) + (val & 0xFF) > 0xFF;
+
+	set_f_z(false);
+	set_f_n(false);
+	set_f_h(half_carry);
+	set_f_c(carry);
+
+	return sp + val;
+}
+
+// ADD SP, d8
+void cpu::add_sp_d8(){
+	int val = read_d8();
+
+	printf("ADD SP, %d", val);
+
+	sp = add_sp(val);
+
+	tick = tick + 8;
+}
+
+// LD HL, SP+d8
+void cpu::ld_hl_sp_d8(){
+	char offset = read_d8();
+
+	printf("LD HL, SP + %d", offset);
+
+	tick = tick + 4;
+
+	int res = add_sp(offset);
+	set_hl(res);
+}
+
+//AND r8
+void cpu::and_r8(char reg){
+	printf("AND %s", reg_to_string(reg)); //ayashii...
+
+	int res = a & read_r8(reg);
+	a = res;
+
+	set_f_z(res == 0);
+	set_f_n(false);
+	set_f_h(true);
+	set_f_c(false);
+}
+
+//OR r8
+void cpu::or_r8(char reg){
+	printf("OR %s", reg_to_string(reg)); //ayashii...
+
+	int res = a | read_r8(reg);
+	a = res;
+
+	set_f_z(res == 0);
+	set_f_n(false);
+	set_f_h(false);
+	set_f_c(false);
+}
+
+//XOR r8
+void cpu::xor_r8(char reg){
+	printf("XOR %s", reg_to_string(reg));
+
+	int res = a ^ read_r8(reg);
+	a = res;
+
+	set_f_z(res == 0);
+	set_f_n(false);
+	set_f_h(false);
+	set_f_c(false);
+}
+
+//CP r8
+void cpu::cp_r8(char reg){
+	printf("CP %s", reg_to_string(reg));
+
+	int a = a;
+	int val = read_r8(reg);
+
+	set_f_z(a == val);
+	set_f_n(true);
+	set_f_h(a & 0x0F < val & 0x0F);
+	set_f_c(a < val);	
+}
+
+//Decimal adjust re;gister A
+void cpu::daa(){
+	printf("DAA");
+
+	int aa = a;
+
+	if(!f_n()){
+		if(f_c() || aa > 0x99){
+			aa = aa + 0x60;
+			set_f_c(true);
+		}
+		if(f_h() || aa & 0x0F > 0x09){
+			aa = aa + 0x06;
+		}
+	}else{
+		if(f_c()){
+			aa = aa + 0x60;
+		}
+		if(f_h()){
+			aa = aa + 0x06;
+		}
+	}
+
+	a = aa;
+
+	set_f_z(a == 0);
+	set_f_h(false);
+}
+
+//Complement A
+void cpu::cpl(){
+	printf("CPL");
+
+	a = !a;
+	set_f_n(true);
+	set_f_h(true);
+}
+
+//Complement carry flag
+void cpu::ccf(){
+	printf("CCF");
+
+	set_f_n(false);
+	set_f_h(false);
+
+	int c = f_c();
+	set_f_c(!c);
+}
+
+//Set carry flag
+void cpu::scf(){
+	printf("SCF");
+
+	set_f_n(false);
+	set_f_h(false);
+	set_f_c(true);
+}
+
+void cpu::add(char val){
+	bool half_carry = (a & 0xF) + (val & 0xF) > 0xF;
+	int res = a + val;
+	bool carry = res; //tuple!!
+
+	a = res;
+
+	set_f_z(res == 0);
+	set_f_n(false);
+	set_f_h(half_carry);
+	set_f_c(carry);
+
+}

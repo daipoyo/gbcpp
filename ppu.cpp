@@ -58,8 +58,9 @@ std::tuple<int, int> render::fetch_bg_window_tile(int tile_x, int tile_y, int of
 	int tile_no = a[tile_map_addr];
 	int lcdc = a[0xff40];
 
-	render render;
-	render.fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
+	//render render;
+	//render.fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
+	fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
 }
 std::tuple<int, int> render::fetch_bg_tile(int tile_x, int tile_y, int offset_y){
 	int lcdc = a[0xff40];
@@ -71,8 +72,8 @@ std::tuple<int, int> render::fetch_bg_tile(int tile_x, int tile_y, int offset_y)
 		tile_map_base = 0x1800;
 	}
 
-	render render;
-	render.fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
+	//render render;
+	fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
 }
 
 std::tuple<int, int> render::fetch_window_tile(int tile_x, int tile_y, int offset_y){
@@ -85,8 +86,8 @@ std::tuple<int, int> render::fetch_window_tile(int tile_x, int tile_y, int offse
 		tile_map_base = 0x1800;
 	}
 
-	render render;
-	render.fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
+	//render render;
+	fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
 }
 
 int render::map_color(int color_no, int palette){
@@ -115,8 +116,8 @@ int render::get_color_no(int tile0, int tile1, int bitpos){
 
 
 void render::render_bg(){
-	render render;
-	read_rom rom;
+	//render render;
+	//read_rom rom;
 
 	int tile_x = scx >> 3;
 	int tile_y = scy + ly >> 3;
@@ -125,7 +126,8 @@ void render::render_bg(){
 	int offset_y = scy + ly & 0x7;
 
 	int tile0,tile1;
-	std::tie(tile0, tile1) = render.fetch_bg_tile(tile_x, tile_y, offset_y);
+	//std::tie(tile0, tile1) = render.fetch_bg_tile(tile_x, tile_y, offset_y);
+	std::tie(tile0, tile1) = fetch_bg_tile(tile_x, tile_y, offset_y);
 
 	bool window = false;
 
@@ -137,13 +139,16 @@ void render::render_bg(){
 				tile_y = (ly - wy) >> 3;
 				offset_x = 0;
 				offset_y = (ly - wy) & 0x7;
-				std::tie(tile0, tile1)  = render.fetch_window_tile(tile_x, tile_y, offset_y);
+				//std::tie(tile0, tile1)  = render.fetch_window_tile(tile_x, tile_y, offset_y);
+				std::tie(tile0, tile1)  = fetch_window_tile(tile_x, tile_y, offset_y);
 				window = true;
 			}
 		}
 
-		int color_no = render.get_color_no(tile0, tile1, 7 - offset_x);
-		int color = render.map_color(color_no, bg_palette);
+		//int color_no = render.get_color_no(tile0, tile1, 7 - offset_x);
+		int color_no = get_color_no(tile0, tile1, 7 - offset_x);
+		//int color = render.map_color(color_no, bg_palette);
+		int color = map_color(color_no, bg_palette);
 
 		if(color_no == 0){
 			bg_prio[i] = "Color0";        //colorless??
@@ -161,9 +166,11 @@ void render::render_bg(){
 			tile_x ++;
 
 			if(window){
-				std::tie(tile0, tile1)  = render.fetch_window_tile(tile_x, tile_y, offset_y);
+				//std::tie(tile0, tile1)  = render.fetch_window_tile(tile_x, tile_y, offset_y);
+				std::tie(tile0, tile1)  = fetch_window_tile(tile_x, tile_y, offset_y);
 			}else{
-				std::tie(tile0, tile1)  = render.fetch_bg_tile(tile_x, tile_y, offset_y);
+				//std::tie(tile0, tile1)  = render.fetch_bg_tile(tile_x, tile_y, offset_y);
+				std::tie(tile0, tile1)  = fetch_bg_tile(tile_x, tile_y, offset_y);
 			}
 		}
 	}

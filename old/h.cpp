@@ -1,3 +1,7 @@
+#include <string>
+#include <vector>
+
+
 std::vector<int> a;
 const int screen_width = 160;
 const int screen_height = 144;

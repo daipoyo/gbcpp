@@ -271,7 +271,7 @@ int cpu::read_r16(int idx){
 	}
 }
 //Read 8-bit immediate from memory
-char cpu::read_d8(){
+short cpu::read_d8(){
 	int pc = pc;
 	int imm = read_mem8(pc);
 	pc = pc + 1;
@@ -405,7 +405,7 @@ void cpu::add_hl_r16(int reg){
 	set_f_c(carry);
 }
 
-int cpu::add_sp(char offset){
+int cpu::add_sp(short offset){
 	int val = offset;
 
 	bool half_carry = (sp & 0x0F) + (val & 0x0F) > 0x0F;
@@ -432,7 +432,7 @@ void cpu::add_sp_d8(){
 
 // LD HL, SP+d8
 void cpu::ld_hl_sp_d8(){
-	char offset = read_d8();
+	short offset = read_d8();
 
 	printf("LD HL, SP + %d", offset);
 
@@ -443,7 +443,7 @@ void cpu::ld_hl_sp_d8(){
 }
 
 //AND r8
-void cpu::and_r8(char reg){
+void cpu::and_r8(short reg){
 	printf("AND %s", reg_to_string(reg)); //ayashii...
 
 	int res = a & read_r8(reg);
@@ -456,7 +456,7 @@ void cpu::and_r8(char reg){
 }
 
 //OR r8
-void cpu::or_r8(char reg){
+void cpu::or_r8(short reg){
 	printf("OR %s", reg_to_string(reg)); //ayashii...
 
 	int res = a | read_r8(reg);
@@ -469,7 +469,7 @@ void cpu::or_r8(char reg){
 }
 
 //XOR r8
-void cpu::xor_r8(char reg){
+void cpu::xor_r8(short reg){
 	printf("XOR %s", reg_to_string(reg));
 
 	int res = a ^ read_r8(reg);
@@ -482,7 +482,7 @@ void cpu::xor_r8(char reg){
 }
 
 //CP r8
-void cpu::cp_r8(char reg){
+void cpu::cp_r8(short reg){
 	printf("CP %s", reg_to_string(reg));
 
 	int a = a;
@@ -552,10 +552,17 @@ void cpu::scf(){
 	set_f_c(true);
 }
 
-void cpu::add(char val){
+void cpu::add(short val){
 	bool half_carry = (a & 0xF) + (val & 0xF) > 0xF;
-	int res = a + val;
-	bool carry = res; //tuple!!
+	//int res = a + val;
+	//bool carry = res; //tuple!!
+	bool carry = (a & 0xFF) + (val & 0xFF) > 0xFF;
+	int res;
+	if(carry){
+		res = a + val - 0xFF;
+	}else{
+		res = a + val;
+	}
 
 	a = res;
 
@@ -563,5 +570,58 @@ void cpu::add(char val){
 	set_f_n(false);
 	set_f_h(half_carry);
 	set_f_c(carry);
+
+}
+
+//ADD r8
+void cpu::add_r8(unsigned short reg){
+	unsigned short val = read_r8(reg);
+	printf("ADD %d", reg_to_string(reg));
+
+	add(val);
+}
+
+void cpu::adc(unsigned short val){
+	short c;
+	if(f_c()){
+		c = 1;
+	}else{
+		c = 0;
+	}
+
+	short res;
+	if(a + val > 0xF){
+		res = a + val - 0xF;
+		if(res + c > 0xF){
+			res = res + c - 0xF;
+		}else{
+			res = res + c;
+		}
+	}else{
+		res = a + val;
+		if(res + c > 0xF){
+			res = res + c - 0xF;
+		}else{
+			res = res + c;
+		}
+	}
+
+	bool half_carry = (a & 0xF) + (val & 0xF) + c > 0xF;
+	bool carry = a + val + c > 0xFF;
+
+	a = res;
+
+	set_f_z(res == 0);
+	set_f_n(false);
+	set_f_h(half_carry);
+	set_f_c(carry);
+}
+
+//ADC r8
+void cpu::adc_r8(unsigned short reg){
+	unsigned short val = read_r8(reg);
+	printf("ADC %d", reg_to_string(reg));
+
+	adc(val);
 
 }

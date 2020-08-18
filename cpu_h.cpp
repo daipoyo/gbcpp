@@ -39,7 +39,7 @@ public:
     int read_r8(int idx);
     void write_r16(int idx, int val);
     int read_r16(int idx);
-    char read_d8();
+    short read_d8();
     int read_d16();
     bool cc(int idx);
     std::string cc_to_string(int idx);
@@ -51,17 +51,22 @@ public:
     void ld_ind_d16_sp();
     void ld_sp_hl();
     void add_hl_r16(int reg);
-    int add_sp(char offset);
+    int add_sp(short offset);
     void add_sp_d8();
     void ld_hl_sp_d8();
-    void and_r8(char reg);
-    void or_r8(char reg);
-    void xor_r8(char reg);
-    void cp_r8(char reg);
+    void and_r8(short reg);
+    void or_r8(short reg);
+    void xor_r8(short reg);
+    void cp_r8(short reg);
     void daa();
     void cpl();
     void ccf();
     void scf();
-    void add(char val);
+    void add(short val);
+    void add_r8(unsigned short reg);
+    void adc(unsigned short val);
+    void adc_r8(unsigned short reg);
+
+
 
 };

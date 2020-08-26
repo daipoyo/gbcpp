@@ -625,3 +625,81 @@ void cpu::adc_r8(unsigned short reg){
 	adc(val);
 
 }
+
+void cpu::sub(unsigned short val){
+    void half_carry = (a & 0xf) < (val & 0xf);
+    void carry = (a & 0xf) - (val & 0xf) < 0x0;
+    
+    unsigned short res;
+    if(carry){
+        res = 0;
+    }else{
+        res = (a & 0xf) - (val & 0xf);
+    }
+    
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(true);
+    set_f_h(half_carry);
+    set_f_c(carry);
+}
+
+
+//SUB r8
+void cpu::sub_r8(unsigned short reg){
+    unsigned short val = read_r8(reg);
+
+    printf("SUB %d", reg_to_string(reg));
+
+    sub(val);
+}
+
+void cpu::sbc(unsigned short val){
+    unsigned short c;
+    if(f_c()){
+        c = 1;
+    }else{
+        c = 0;
+    }
+
+    void half_carry = (a & 0xf) < (val & 0xf) + c;
+    void carry = (a & 0xff) < (val & 0xff) + c;
+
+    unsigned short res;
+    if((a & 0xff) - (val & 0xff) - c < 0){
+        res = 0;
+    }else{
+        res = (a & 0xff) - (val & 0xff) - c;
+    }
+
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(true);
+    set_f_h(half_carry);
+    set_f_c(carry);
+
+}
+
+//SBC r8
+void sbc_r8(unsigned short reg){
+    unsigned short val = read_r8(reg);
+
+    printf("SBC %d", reg_to_string(reg));
+
+    sbc(val);
+}
+
+//ADD d8
+void add_d8(){
+    unsigned short val = read_d8();
+
+    printf("ADD 0x%d", val);
+
+    add(val); 
+}
+
+
+
+

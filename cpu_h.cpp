@@ -66,7 +66,7 @@ public:
     void add_r8(unsigned short reg);
     void adc(unsigned short val);
     void adc_r8(unsigned short reg);
-
-
+    void sub(unsigned short val);
+    void sbc(unsigned short val);
 
 };

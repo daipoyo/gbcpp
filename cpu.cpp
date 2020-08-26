@@ -623,5 +623,15 @@ void cpu::adc_r8(unsigned short reg){
 	printf("ADC %d", reg_to_string(reg));
 
 	adc(val);
-
 }
+
+void cpu::sub(unsigned short val){
+	bool half_carry = (a & 0xf) < (val & 0xf);
+
+	short res;
+	if(a - val < 0){
+		res = a - val 
+	}
+}
+
+

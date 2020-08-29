@@ -272,7 +272,7 @@ int cpu::read_r16(int idx){
 }
 //Read 8-bit immediate from memory
 short cpu::read_d8(){
-	int pc = pc;
+	//unsigned int pc = pc;
 	int imm = read_mem8(pc);
 	pc = pc + 1;
 
@@ -455,6 +455,20 @@ void cpu::and_r8(short reg){
 	set_f_c(false);
 }
 
+//AND d8
+void cpu::and_d8(){
+    unsigned short val = read_d8();
+    printf("AND 0x%02x", val);
+
+    unsigned short res = a & val;
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(true);
+    set_f_c(false);
+}
+
 //OR r8
 void cpu::or_r8(short reg){
 	printf("OR %s", reg_to_string(reg)); //ayashii...
@@ -466,6 +480,20 @@ void cpu::or_r8(short reg){
 	set_f_n(false);
 	set_f_h(false);
 	set_f_c(false);
+}
+
+//OR d8
+void cpu::or_d8(){
+    unsigned short val = read_d8();
+    printf("OR 0x%02x", val);
+
+    unsigned short res = a | val;
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(false);
 }
 
 //XOR r8
@@ -481,6 +509,20 @@ void cpu::xor_r8(short reg){
 	set_f_c(false);
 }
 
+//XOR d8
+void xor_d8(){
+    unsigned short val = read_d8();
+    printf("XOR 0x%02x", val);
+
+    unsigned short res = a ^ val;
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(false);
+}
+
 //CP r8
 void cpu::cp_r8(short reg){
 	printf("CP %s", reg_to_string(reg));
@@ -492,6 +534,17 @@ void cpu::cp_r8(short reg){
 	set_f_n(true);
 	set_f_h(a & 0x0F < val & 0x0F);
 	set_f_c(a < val);	
+}
+
+//CP d8
+void cpu::cp_d8(){
+    imm = read_d8();
+    printf("CP 0x%02x", imm);
+
+    set_f_z(a == imm);
+    set_f_n(true);
+    set_f_h(a & 0x0f < imm & 0x0f);
+    set_f_c(a < imm);
 }
 
 //Decimal adjust re;gister A
@@ -626,6 +679,15 @@ void cpu::adc_r8(unsigned short reg){
 
 }
 
+//ADC d8
+void cpu::adc_d8(){
+    unsigned short val = read_d8();
+    printf("ADC 0x%02x", val);
+
+    adc(val);
+}
+
+
 void cpu::sub(unsigned short val){
     void half_carry = (a & 0xf) < (val & 0xf);
     void carry = (a & 0xf) - (val & 0xf) < 0x0;
@@ -650,10 +712,19 @@ void cpu::sub(unsigned short val){
 void cpu::sub_r8(unsigned short reg){
     unsigned short val = read_r8(reg);
 
-    printf("SUB %d", reg_to_string(reg));
+    printf("SUB 0x%02x", reg_to_string(reg));
 
     sub(val);
 }
+
+//SUB d8
+void cpu::sub_d8(){
+    unsigned int val = read_d8();
+
+    printf("SUB 0x%02X", val);
+
+    sub(val);
+}    
 
 void cpu::sbc(unsigned short val){
     unsigned short c;
@@ -683,10 +754,18 @@ void cpu::sbc(unsigned short val){
 }
 
 //SBC r8
-void sbc_r8(unsigned short reg){
+void cpu::sbc_r8(unsigned short reg){
     unsigned short val = read_r8(reg);
 
     printf("SBC %d", reg_to_string(reg));
+
+    sbc(val);
+}
+
+//SBC d8
+void cpu::sbc_d8(){
+    unsigned short val = read_d8();
+    printf("SBC 0x%02x", val);
 
     sbc(val);
 }
@@ -699,6 +778,95 @@ void add_d8(){
 
     add(val); 
 }
+
+//LDI HL, A
+void cpu::ldi_hl_a(){
+    printf("LD (HL+), A");
+
+    unsigned int addr = hl();
+    write_mem8(addr, a);
+    unsigned int hl = hl();
+    if(hl + 1 > 0xffff){
+        set_hl(0);
+    }else{
+        set_fl(hl + 1);    
+    }
+} 
+
+//LDD HL, A
+void cpu::ldd_hl_a(){
+    printf("LD (HL-), A");
+
+    unsigned int addr = hl();
+    write_mem8(addr, a);
+    unsigned int hl = hl();
+    if(hl - 1 < 0){          //ayashii.....
+        set_hl(0xffff);
+    }else{
+        set_hl(hl - 1);
+    }
+}
+
+//LDI A, HL
+void cpu::ldi_a_hl(){
+    printf("LD A, (HL+)");
+
+    unsigned int addr = hl();
+    a = read_mem8(addr);
+    unsigned int hl = hl();
+    if(hl + 1 > 0xffff){
+        set_hl(0);
+    }else{
+        set_hl(hl + 1);
+    }
+}
+
+//LDD A, HL
+void cpu::ldd_a_hl(){
+    printf("LD A, (HL-)");
+
+    unsigned int addr = hl();
+    a = read_mem8(addr);
+    unsigned int hl = hl();
+    if(hl - 1 < 0){
+        set_hl(0xffff);
+    }else{
+        set_hl(hl - 1);
+    }
+}
+
+//LD ind BC, A
+void cpu::ld_ind_bc_a(){
+    printf("LD (BC), A");
+
+    unsigned int addr = bc();
+    write_mem8(addr, a);
+}
+
+//LD ind DE, A
+void cpu::ld_ind_de_a(){
+    printf("LD (DE), A");
+
+    unsigned int addr = de();
+    write_mem8(addr, a);
+}
+
+//LD ind A, BC
+void cpu::ld_ind_a_bc(){
+    printf("LD A, (BC)");
+
+    unsigned int bc = bc();
+    a = read_mem8(bc);
+}
+
+//LD ind A, DE
+void cpu::ld_ind_a_de(){
+    printf("LD A, (DE)");
+
+    unsigned int de = de();
+    a = read_mem8(de);
+}
+
 
 
 

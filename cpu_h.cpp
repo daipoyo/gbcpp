@@ -55,18 +55,25 @@ public:
     void add_sp_d8();
     void ld_hl_sp_d8();
     void and_r8(short reg);
+    void and_d8();
     void or_r8(short reg);
+    void or_d8();
     void xor_r8(short reg);
+    void xor_d8();
     void cp_r8(short reg);
+    void cp_d8();
     void daa();
     void cpl();
     void ccf();
     void scf();
     void add(short val);
     void add_r8(unsigned short reg);
+    void sub_r8(unsigned short reg);
     void adc(unsigned short val);
     void adc_r8(unsigned short reg);
+    void adc_d8();
     void sub(unsigned short val);
     void sbc(unsigned short val);
+    void sbc_r8(unsigned short reg);
 
 };

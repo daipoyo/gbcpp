@@ -510,7 +510,7 @@ void cpu::xor_r8(short reg){
 }
 
 //XOR d8
-void xor_d8(){
+void cpu::xor_d8(){
     unsigned short val = read_d8();
     printf("XOR 0x%02x", val);
 
@@ -538,7 +538,7 @@ void cpu::cp_r8(short reg){
 
 //CP d8
 void cpu::cp_d8(){
-    imm = read_d8();
+    unsigned short imm = read_d8();
     printf("CP 0x%02x", imm);
 
     set_f_z(a == imm);
@@ -689,8 +689,8 @@ void cpu::adc_d8(){
 
 
 void cpu::sub(unsigned short val){
-    void half_carry = (a & 0xf) < (val & 0xf);
-    void carry = (a & 0xf) - (val & 0xf) < 0x0;
+    bool half_carry = (a & 0xf) < (val & 0xf);
+    bool carry = (a & 0xf) - (val & 0xf) < 0x0;
     
     unsigned short res;
     if(carry){
@@ -734,8 +734,8 @@ void cpu::sbc(unsigned short val){
         c = 0;
     }
 
-    void half_carry = (a & 0xf) < (val & 0xf) + c;
-    void carry = (a & 0xff) < (val & 0xff) + c;
+    bool half_carry = (a & 0xf) < (val & 0xf) + c;
+    bool carry = (a & 0xff) < (val & 0xff) + c;
 
     unsigned short res;
     if((a & 0xff) - (val & 0xff) - c < 0){
@@ -867,7 +867,31 @@ void cpu::ld_ind_a_de(){
     a = read_mem8(de);
 }
 
+//Test bit
+void cpu::bit(unsigned short pos, unsigned short reg){
+    printf("BIT %d, %d", pos, reg_to_string(reg));
+    bool z = (read_r8(reg) >> pos & 1) == 0;
 
+    set_f_z(z);
+    set_f_n(false);
+    set_f_h(true);
+}
+
+//Set bit
+void cpu::set(unsigned short pos, unsigned short reg){
+    printf("SET %d, %d", pos, reg_to_string(reg));
+
+    unsigned short val = read_r8(reg);
+    write_r8(reg, val | (1 << pos));
+}
+
+//Reset bit
+void cpu::res(unsigned short res, unsigned short reg){
+    printf("RES %d, %d", pos, reg_to_string(reg));
+
+    unsigned short val = read_r8(reg);
+    write_r8(reg, val & !(1 << pos));
+}
 
 
 

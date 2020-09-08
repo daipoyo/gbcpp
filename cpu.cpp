@@ -764,14 +764,14 @@ void cpu::sbc_r8(unsigned short reg){
 
 //SBC d8
 void cpu::sbc_d8(){
-    unsigned short val = read_d8();
+    unsigned int val = read_d8();
     printf("SBC 0x%02x", val);
 
     sbc(val);
 }
 
 //ADD d8
-void add_d8(){
+void cpu::add_d8(){
     unsigned short val = read_d8();
 
     printf("ADD 0x%d", val);
@@ -785,11 +785,11 @@ void cpu::ldi_hl_a(){
 
     unsigned int addr = hl();
     write_mem8(addr, a);
-    unsigned int hl = hl();
-    if(hl + 1 > 0xffff){
+    unsigned int hll = hl();
+    if(hll + 1 > 0xffff){
         set_hl(0);
     }else{
-        set_fl(hl + 1);    
+        set_hl(hll + 1);    
     }
 } 
 
@@ -799,11 +799,11 @@ void cpu::ldd_hl_a(){
 
     unsigned int addr = hl();
     write_mem8(addr, a);
-    unsigned int hl = hl();
-    if(hl - 1 < 0){          //ayashii.....
+    unsigned int hll = hl();
+    if(hll - 1 < 0){          //ayashii.....
         set_hl(0xffff);
     }else{
-        set_hl(hl - 1);
+        set_hl(hll - 1);
     }
 }
 
@@ -813,11 +813,11 @@ void cpu::ldi_a_hl(){
 
     unsigned int addr = hl();
     a = read_mem8(addr);
-    unsigned int hl = hl();
-    if(hl + 1 > 0xffff){
+    unsigned int hll = hl();
+    if(hll + 1 > 0xffff){
         set_hl(0);
     }else{
-        set_hl(hl + 1);
+        set_hl(hll + 1);
     }
 }
 
@@ -827,11 +827,11 @@ void cpu::ldd_a_hl(){
 
     unsigned int addr = hl();
     a = read_mem8(addr);
-    unsigned int hl = hl();
-    if(hl - 1 < 0){
+    unsigned int hll = hl();
+    if(hll - 1 < 0){
         set_hl(0xffff);
     }else{
-        set_hl(hl - 1);
+        set_hl(hll - 1);
     }
 }
 
@@ -855,16 +855,16 @@ void cpu::ld_ind_de_a(){
 void cpu::ld_ind_a_bc(){
     printf("LD A, (BC)");
 
-    unsigned int bc = bc();
-    a = read_mem8(bc);
+    unsigned int bcc = bc();
+    a = read_mem8(bcc);
 }
 
 //LD ind A, DE
 void cpu::ld_ind_a_de(){
     printf("LD A, (DE)");
 
-    unsigned int de = de();
-    a = read_mem8(de);
+    unsigned int dee = de();
+    a = read_mem8(dee);
 }
 
 //Test bit
@@ -886,12 +886,122 @@ void cpu::set(unsigned short pos, unsigned short reg){
 }
 
 //Reset bit
-void cpu::res(unsigned short res, unsigned short reg){
+void cpu::res(unsigned short pos, unsigned short reg){
     printf("RES %d, %d", pos, reg_to_string(reg));
 
     unsigned short val = read_r8(reg);
     write_r8(reg, val & !(1 << pos));
 }
+
+
+void cpu::_rl(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if((orig << 1) || (f_c())){
+        res = 1;
+    }else{
+        res = 0;
+    }
+
+    write_r8(reg,res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig >> 7 & 1 == 1);
+}
+
+//Rotate left through carry
+void cpu::rl(unsigned short reg){
+    printf("RL %s", reg_to_string(reg));
+
+    _rl(reg);
+}
+
+void cpu::_rlc(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res = orig << 1;
+    write_r8(reg, res);
+
+    set_f_z(res);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig >> 7 & 1 == 1);
+
+}
+
+//Rotate left
+void cpu::rlc(unsigned short reg){
+    printf("RLC %s", reg_to_string(reg));
+
+    rlc(reg);
+}
+
+void cpu::_rr(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if(f_c()){
+        res = (orig >> 1) | 1 << 7;
+    }else{
+        //res = (orig >> 1) | 0 << 7;
+        res = (orig >> 1) | 0;
+    }
+
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 == 1);
+}
+
+//Rotate right through carry
+void cpu::rr(unsigned short reg){
+    printf("RR %s", reg_to_string(reg));
+
+    _rr(reg);
+}
+
+void cpu::_rrc(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res = orig >> 1;
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 == 1);
+}
+
+//Rotate right
+void cpu::rrc(unsigned short reg){
+    printf("RRC %s", reg_to_string(reg));
+
+    _rrc(reg);
+}
+
+int main(){
+    cpu cpu;
+    printf("RRC [%2s]", cpu.reg_to_string(3));
+
+    return EXIT_SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

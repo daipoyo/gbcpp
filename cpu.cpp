@@ -1171,6 +1171,7 @@ void cpu::ld_r8_r8(unsigned short reg1, unsigned short reg2){
 void cpu::_call(unsigned int addr){
     if(sp - 1 < 0){
         sp = 0xff;
+        sp = sp - 1;
     }else{
         sp = sp - 1;
         if(sp - 1 < 0){
@@ -1186,7 +1187,67 @@ void cpu::_call(unsigned int addr){
     pc = addr;
 }
 
+//CALL d16
+void cpu::call_d16(){
+    unsigned int addr = read_d16();
 
+    printf("CALL [%x]",  addr);
+
+    _call(addr);
+}
+
+//CALL CC, d16
+void cpu::call_cc_d16(unsigned short cci){
+    unsigned int addr = read_d16();
+
+    printf("CALL [%s], 0x[%x]", cc_to_string(cci), addr);
+
+    if(cc(cci)){
+        _call(addr);
+    }
+}
+
+void cpu::rst(unsigned short addr){
+    printf("RST 0x[%02x]", addr);
+
+    _call(addr);
+}
+
+void cpu::_ret(){
+    pc = read_mem16(sp);
+    
+    if(sp + 1 > 0xff){
+        sp = 0;
+        sp = sp + 1;
+    }else{
+        sp = sp + 1;
+        if(sp + 1 > 0xff){
+            sp = 0;
+        }else{
+            sp = sp + 1;
+        }
+    }
+
+    tick = tick + 4;
+}
+
+//RET
+void cpu::ret(){
+    printf("RET");
+
+    _ret();
+}
+
+//RET CC
+void cpu::ret_cc(unsigned short cci){
+    printf("RET [%s]", cc_to_string(cci));
+
+    tick = tick + 4;
+
+    if(cc(cci)){
+        _ret();
+    }
+}
 
 
 

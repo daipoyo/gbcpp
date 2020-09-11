@@ -116,5 +116,11 @@ public:
     void dec_r8(unsigned short reg);
     void ld_r8_r8(unsigned short reg1, unsigned short reg2);
     void _call(unsigned int addr);
+    void call_d16();
+    void call_cc_d16(unsigned short cci);
+    void rst(unsigned short addr);
+    void _ret();
+    void ret();
+    void ret_cc(unsigned short cci);
 
 };

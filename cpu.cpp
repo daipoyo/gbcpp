@@ -982,6 +982,214 @@ void cpu::rrc(unsigned short reg){
     _rrc(reg);
 }
 
+//Shift left into carry
+void cpu::sla(unsigned short reg){
+    printf("SLA [%2s]", reg_to_string(reg));
+    
+    unsigned short orig = read_r8(reg);
+    unsigned int res = orig << 1;
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 0x80 > 0);
+}
+
+//Shift right into carry
+void cpu::sra(unsigned short reg){
+    printf("SRA [%2s]", reg_to_string(reg));
+
+    unsigned short orig = read_r8(reg);
+    unsigned short res = (orig >> 1) | (orig & 0x80);
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 > 0);
+}
+
+//Swap low/hi-nibble
+void cpu::swap(unsigned short reg){
+    printf("SWAP [%2s]", reg_to_string(reg));
+
+    unsigned short orig = read_r8(reg);
+    unsigned int res = ((orig & 0x0f) << 4) | ((orig & 0xf0) >> 4);
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(false);
+}
+
+//Shift right through carry
+void cpu::srl(unsigned short reg){
+    printf("SRL [%2s]", reg_to_string(reg));
+
+    unsigned short orig = read_r8(reg);
+    unsigned int res = orig >> 1;
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 == 1);
+}
+
+void cpu::_jp(unsigned int addr){
+    pc = addr;
+
+    tick = tick + 4;
+}
+
+void cpu::jp_cc_d8(unsigned short cci){
+    unsigned int addr = read_d16();
+
+    printf("JP [%s], [%04x]", cc_to_string(cci), addr);
+
+    if(cc(cci)){
+        _jp(addr);
+    }
+}
+
+//Unconditional jump to d16
+void cpu::jp_d16(){
+    unsigned int address = read_d16();
+
+    printf("JP [%04x]", address);
+
+    _jp(address);
+}
+
+//Jump to pc+d8 if CC
+void cpu::jr_cc_d8(unsigned short cci){
+    int offset = read_d8();
+
+    printf("JR [%s] [%s]", cc_to_string(cci), offset);
+
+    if(cc(cci)){
+        _jr(offset);
+    }
+}
+
+void cpu::_jr(short offset){
+    if(pc + offset > 0xffff){
+        pc = pc + offset - 0xffff;
+    }else{
+        pc = pc + offset;
+    }
+
+    tick = tick + 4;
+}
+
+//Jump to pc+d8
+void cpu::jr_d8(){
+    short offset = read_d8();
+    printf("JR [%d]", offset);
+
+    _jr(offset);
+}
+
+void cpu::ld_io_d8_a(){
+    unsigned int offset = read_d8();
+    unsigned int addr  = 0xff00 | offset;
+
+    printf("LD (0xff00+0x[%02x]), A", offset);
+
+    write_mem8(addr, a);
+}
+
+void cpu::ld_io_c_a(){
+    unsigned int addr = 0xff00 | c;
+    printf("LD (0xff00 + C), A");
+    
+    write_mem8(addr, a);
+}
+
+void cpu::ld_a_io_c(){
+    unsigned int addr = 0xff00 | c;
+    printf("LD A, (0xff00 + c)");
+
+    a = read_mem8(addr);
+}
+
+void cpu::ld_r8_d8(unsigned short reg){
+    unsigned short imm = read_d8();
+    printf("LD [%s], 0x[%02x]", reg_to_string(reg), imm);
+
+    write_r8(reg, imm);
+}
+
+//INC r8
+void cpu::inc_r8(unsigned short reg){
+    printf("INC [%s]", reg_to_string(reg));
+
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if(orig + 1 > 0xff){
+        res = 0;
+    }else{
+        res = orig + 1;
+    }
+
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_h(orig & 0x0f == 0x0f);
+    set_f_n(false);
+}
+
+//DEC r8
+void cpu::dec_r8(unsigned short reg){
+    printf("DEC [%s]", reg_to_string(reg));
+
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if(orig - 1 < 0){
+        res = 0xff;
+    }else{
+        res = orig - 1;
+    }
+
+    set_f_z(res == 0);
+    set_f_h(orig & 0x0f == 0x00);
+    set_f_n(true);
+}
+
+//LD r8, r8
+void cpu::ld_r8_r8(unsigned short reg1, unsigned short reg2){
+    printf("LD [%s], [%s]", reg_to_string(reg1), reg_to_string(reg2));
+
+    unsigned short val = read_r8(reg2);
+    write_r8(reg1, val);
+}
+
+void cpu::_call(unsigned int addr){
+    if(sp - 1 < 0){
+        sp = 0xff;
+    }else{
+        sp = sp - 1;
+        if(sp - 1 < 0){
+            sp = 0xff;
+        }else{
+            sp = sp - 1;
+        }
+    }
+    
+    tick = tick + 4;
+
+    write_mem16(sp, pc);
+    pc = addr;
+}
+
+
+
+
+
 int main(){
     cpu cpu;
     printf("RRC [%2s]", cpu.reg_to_string(3));

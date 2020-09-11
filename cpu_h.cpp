@@ -98,5 +98,23 @@ public:
     void rr(unsigned short reg);
     void _rrc(unsigned short reg);
     void rrc(unsigned short reg);
+    void sla(unsigned short reg);
+    void sra(unsigned short reg);
+    void swap(unsigned short reg);
+    void srl(unsigned short reg);
+    void _jp(unsigned int addr);
+    void jp_cc_d8(unsigned short cci);
+    void jp_d16();
+    void jr_cc_d8(unsigned short cci);
+    void _jr(short offset);
+    void jr_d8();
+    void ld_io_d8_a();
+    void ld_io_c_a();
+    void ld_a_io_c();
+    void ld_r8_d8(unsigned short reg);
+    void inc_r8(unsigned short reg);
+    void dec_r8(unsigned short reg);
+    void ld_r8_r8(unsigned short reg1, unsigned short reg2);
+    void _call(unsigned int addr);
 
 };

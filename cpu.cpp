@@ -106,56 +106,64 @@ bool cpu::f_c(){
 
 //Convert 8-bit register index to name
 std::string cpu::reg_to_string(int idx){
+
+	std::string reg8;
+
 	switch(idx){
 		case 0:
-			return "B";
+			reg8 = "B";
 			break;
 		case 1:
-			return "C";
+			reg8 = "C";
 			break;
 		case 2:
-			return "D";
+			reg8 = "D";
 			break;
 		case 3:
-			return "E";
+			reg8 = "E";
 			break;
 		case 4:
-			return "H";
+			reg8 = "H";
 			break;
 		case 5:
-			return "L";
+			reg8 = "L";
 			break;
 		case 6:
-			return "HL";
+			reg8 = "HL";
 			break;
 		case 7:
-			return "A";
+			reg8 = "A";
 			break;
 		default:
 			printf("Invalid Operand index %d", idx);
 			break;
 	}
+	return reg8;
 }
 
 //Convert 16-bit register index to name
 std::string cpu::reg16_to_string(int idx){
+
+	std::string reg16;
+
 	switch(idx){
 		case 0:
-			return "BC";
+			reg16 = "BC";
 			break;
 		case 1:
-			return "DE";
+			reg16 = "DE";
 			break;
 		case 2:
-			return "HL";
+			reg16 = "HL";
 			break;
 		case 3:
-			return "SP";
+			reg16 = "SP";
 			break;
 		default:
 			printf("Invalid Operand index %d", idx);
 			break;
 	}
+	return reg16;
 }
 
 
@@ -197,37 +205,41 @@ void cpu::write_r8(int idx, int val){
 
 //Read 8-bit operand
 int cpu::read_r8(int idx){
+
+	int operand;
+
 	switch(idx){
 		case 0:
-			return b;
+			operand = b;
 			break;
 		case 1:
 			return c;
 			break;
 		case 2:
-			return d;
+			operand = d;
 			break;
 		case 3:
-			return e;
+			operand = e;
 			break;
 		case 4:
-			return h;
+			operand = h;
 			break;
 		case 5:
-			return l;
+			operand = l;
 			break;
 		case 6:{
 			int hl_val = hl();
-			read_mem8(hl_val);
+			operand = read_mem8(hl_val);
 			break;
 		}
 		case 7:
-			return a;
+			operand = a;
 			break;
 		default:
 			printf("Invalid Operand index %d", idx);
 			break;
 	}
+	return operand;
 }
 
 //Write 16-bit operand
@@ -253,23 +265,27 @@ void cpu::write_r16(int idx, int val){
 
 //Read 16-bit operand
 int cpu::read_r16(int idx){
+	int operand;
+
 	switch(idx){
 		case 0:
-			return bc();
+			operand =  bc();
 			break;
 		case 1:
-			return de();
+			operand = de();
 			break;
 		case 2:
-			return hl();
+			operand = hl();
 			break;
 		case 3:
-			return sp;
+			operand = sp;
 			break;
 		default:
 			printf("Invalid Operand Index %d", idx);
 	}
+	return operand;
 }
+
 //Read 8-bit immediate from memory
 short cpu::read_d8(){
 	//unsigned int pc = pc;
@@ -289,38 +305,49 @@ int cpu::read_d16(){
 
 //Checks branch condition
 bool cpu::cc(int idx){
+	bool result;
+
 	switch(idx){
 		case 0:
-			return !f_z();
+			result = !f_z();
 		case 1:
-			return f_z();
+			result = f_z();
 		case 2:
-			return !f_c();
+			result = !f_c();
 		case 3:
-			return f_c();
+			result = f_c();
 		default:
 			printf("Invalid Operand index %d", idx);
 	}
+	return result;
 }
 
 //Convert branch condition to name
 std::string cpu::cc_to_string(int idx){
+	std::string result;
+
 	switch(idx){
 		case 0:
-			return "NZ";
+			//return "NZ";
+			result = "NZ";
 			break;
 		case 1:
-			return "Z";
+			//return "Z";
+			result = "Z";
 			break;
 		case 2:
-			return "NC";
+			//return "NC";
+			result = "NC";
 			break;
 		case 3:
-			return "C";
+			//return "C";
+			result = "C";
 			break;
 		default:
 			printf("Invalid branch condition index %d", idx);
+			break;
 	}
+	return result;
 }
 
 
@@ -444,7 +471,7 @@ void cpu::ld_hl_sp_d8(){
 
 //AND r8
 void cpu::and_r8(short reg){
-	printf("AND %s", reg_to_string(reg)); //ayashii...
+	printf("AND %s", reg_to_string(reg).c_str()); //ayashii...
 
 	int res = a & read_r8(reg);
 	a = res;
@@ -471,7 +498,7 @@ void cpu::and_d8(){
 
 //OR r8
 void cpu::or_r8(short reg){
-	printf("OR %s", reg_to_string(reg)); //ayashii...
+	printf("OR %s", reg_to_string(reg).c_str()); //ayashii...
 
 	int res = a | read_r8(reg);
 	a = res;
@@ -498,7 +525,7 @@ void cpu::or_d8(){
 
 //XOR r8
 void cpu::xor_r8(short reg){
-	printf("XOR %s", reg_to_string(reg));
+	printf("XOR %s", reg_to_string(reg).c_str());
 
 	int res = a ^ read_r8(reg);
 	a = res;
@@ -525,7 +552,7 @@ void cpu::xor_d8(){
 
 //CP r8
 void cpu::cp_r8(short reg){
-	printf("CP %s", reg_to_string(reg));
+	printf("CP %s", reg_to_string(reg).c_str());
 
 	int a = a;
 	int val = read_r8(reg);
@@ -629,7 +656,7 @@ void cpu::add(short val){
 //ADD r8
 void cpu::add_r8(unsigned short reg){
 	unsigned short val = read_r8(reg);
-	printf("ADD %d", reg_to_string(reg));
+	printf("ADD %s", reg_to_string(reg).c_str());
 
 	add(val);
 }
@@ -673,7 +700,7 @@ void cpu::adc(unsigned short val){
 //ADC r8
 void cpu::adc_r8(unsigned short reg){
 	unsigned short val = read_r8(reg);
-	printf("ADC %d", reg_to_string(reg));
+	printf("ADC %s", reg_to_string(reg).c_str());
 
 	adc(val);
 
@@ -712,7 +739,7 @@ void cpu::sub(unsigned short val){
 void cpu::sub_r8(unsigned short reg){
     unsigned short val = read_r8(reg);
 
-    printf("SUB 0x%02x", reg_to_string(reg));
+    printf("SUB %s", reg_to_string(reg).c_str());
 
     sub(val);
 }
@@ -757,7 +784,7 @@ void cpu::sbc(unsigned short val){
 void cpu::sbc_r8(unsigned short reg){
     unsigned short val = read_r8(reg);
 
-    printf("SBC %d", reg_to_string(reg));
+    printf("SBC %s", reg_to_string(reg).c_str());
 
     sbc(val);
 }
@@ -774,7 +801,7 @@ void cpu::sbc_d8(){
 void cpu::add_d8(){
     unsigned short val = read_d8();
 
-    printf("ADD 0x%d", val);
+    printf("ADD 0x%02x", val);
 
     add(val); 
 }
@@ -869,7 +896,7 @@ void cpu::ld_ind_a_de(){
 
 //Test bit
 void cpu::bit(unsigned short pos, unsigned short reg){
-    printf("BIT %d, %d", pos, reg_to_string(reg));
+    printf("BIT %d, %s", pos, reg_to_string(reg).c_str());
     bool z = (read_r8(reg) >> pos & 1) == 0;
 
     set_f_z(z);
@@ -879,7 +906,7 @@ void cpu::bit(unsigned short pos, unsigned short reg){
 
 //Set bit
 void cpu::set(unsigned short pos, unsigned short reg){
-    printf("SET %d, %d", pos, reg_to_string(reg));
+    printf("SET %d, %s", pos, reg_to_string(reg).c_str());
 
     unsigned short val = read_r8(reg);
     write_r8(reg, val | (1 << pos));
@@ -887,7 +914,7 @@ void cpu::set(unsigned short pos, unsigned short reg){
 
 //Reset bit
 void cpu::res(unsigned short pos, unsigned short reg){
-    printf("RES %d, %d", pos, reg_to_string(reg));
+    printf("RES %d, %s", pos, reg_to_string(reg).c_str());
 
     unsigned short val = read_r8(reg);
     write_r8(reg, val & !(1 << pos));
@@ -914,7 +941,7 @@ void cpu::_rl(unsigned short reg){
 
 //Rotate left through carry
 void cpu::rl(unsigned short reg){
-    printf("RL %s", reg_to_string(reg));
+    printf("RL %s", reg_to_string(reg).c_str());
 
     _rl(reg);
 }
@@ -933,7 +960,7 @@ void cpu::_rlc(unsigned short reg){
 
 //Rotate left
 void cpu::rlc(unsigned short reg){
-    printf("RLC %s", reg_to_string(reg));
+    printf("RLC %s", reg_to_string(reg).c_str());
 
     rlc(reg);
 }
@@ -959,7 +986,7 @@ void cpu::_rr(unsigned short reg){
 
 //Rotate right through carry
 void cpu::rr(unsigned short reg){
-    printf("RR %s", reg_to_string(reg));
+    printf("RR %s", reg_to_string(reg).c_str());
 
     _rr(reg);
 }
@@ -977,14 +1004,14 @@ void cpu::_rrc(unsigned short reg){
 
 //Rotate right
 void cpu::rrc(unsigned short reg){
-    printf("RRC %s", reg_to_string(reg));
+    printf("RRC %s", reg_to_string(reg).c_str());
 
     _rrc(reg);
 }
 
 //Shift left into carry
 void cpu::sla(unsigned short reg){
-    printf("SLA [%2s]", reg_to_string(reg));
+    printf("SLA %2s", reg_to_string(reg).c_str());
     
     unsigned short orig = read_r8(reg);
     unsigned int res = orig << 1;
@@ -998,7 +1025,7 @@ void cpu::sla(unsigned short reg){
 
 //Shift right into carry
 void cpu::sra(unsigned short reg){
-    printf("SRA [%2s]", reg_to_string(reg));
+    printf("SRA %2s", reg_to_string(reg).c_str());
 
     unsigned short orig = read_r8(reg);
     unsigned short res = (orig >> 1) | (orig & 0x80);
@@ -1012,7 +1039,7 @@ void cpu::sra(unsigned short reg){
 
 //Swap low/hi-nibble
 void cpu::swap(unsigned short reg){
-    printf("SWAP [%2s]", reg_to_string(reg));
+    printf("SWAP %2s", reg_to_string(reg).c_str());
 
     unsigned short orig = read_r8(reg);
     unsigned int res = ((orig & 0x0f) << 4) | ((orig & 0xf0) >> 4);
@@ -1026,7 +1053,7 @@ void cpu::swap(unsigned short reg){
 
 //Shift right through carry
 void cpu::srl(unsigned short reg){
-    printf("SRL [%2s]", reg_to_string(reg));
+    printf("SRL %2s", reg_to_string(reg).c_str());
 
     unsigned short orig = read_r8(reg);
     unsigned int res = orig >> 1;
@@ -1047,7 +1074,7 @@ void cpu::_jp(unsigned int addr){
 void cpu::jp_cc_d8(unsigned short cci){
     unsigned int addr = read_d16();
 
-    printf("JP [%s], [%04x]", cc_to_string(cci), addr);
+    printf("JP %s, %04x", cc_to_string(cci).c_str(), addr);
 
     if(cc(cci)){
         _jp(addr);
@@ -1058,7 +1085,7 @@ void cpu::jp_cc_d8(unsigned short cci){
 void cpu::jp_d16(){
     unsigned int address = read_d16();
 
-    printf("JP [%04x]", address);
+    printf("JP %04x", address);
 
     _jp(address);
 }
@@ -1067,7 +1094,7 @@ void cpu::jp_d16(){
 void cpu::jr_cc_d8(unsigned short cci){
     int offset = read_d8();
 
-    printf("JR [%s] [%s]", cc_to_string(cci), offset);
+    printf("JR %s %d", cc_to_string(cci).c_str(), offset);
 
     if(cc(cci)){
         _jr(offset);
@@ -1117,14 +1144,14 @@ void cpu::ld_a_io_c(){
 
 void cpu::ld_r8_d8(unsigned short reg){
     unsigned short imm = read_d8();
-    printf("LD [%s], 0x[%02x]", reg_to_string(reg), imm);
+    printf("LD %s, 0x[%02x]", reg_to_string(reg).c_str(), imm);
 
     write_r8(reg, imm);
 }
 
 //INC r8
 void cpu::inc_r8(unsigned short reg){
-    printf("INC [%s]", reg_to_string(reg));
+    printf("INC %s", reg_to_string(reg).c_str());
 
     unsigned short orig = read_r8(reg);
     unsigned short res;
@@ -1144,7 +1171,7 @@ void cpu::inc_r8(unsigned short reg){
 
 //DEC r8
 void cpu::dec_r8(unsigned short reg){
-    printf("DEC [%s]", reg_to_string(reg));
+    printf("DEC %s", reg_to_string(reg).c_str());
 
     unsigned short orig = read_r8(reg);
     unsigned short res;
@@ -1162,7 +1189,7 @@ void cpu::dec_r8(unsigned short reg){
 
 //LD r8, r8
 void cpu::ld_r8_r8(unsigned short reg1, unsigned short reg2){
-    printf("LD [%s], [%s]", reg_to_string(reg1), reg_to_string(reg2));
+    printf("LD %s, %s", reg_to_string(reg1).c_str(), reg_to_string(reg2).c_str());
 
     unsigned short val = read_r8(reg2);
     write_r8(reg1, val);
@@ -1200,7 +1227,7 @@ void cpu::call_d16(){
 void cpu::call_cc_d16(unsigned short cci){
     unsigned int addr = read_d16();
 
-    printf("CALL [%s], 0x[%x]", cc_to_string(cci), addr);
+    printf("CALL %s, 0x[%04x]", cc_to_string(cci).c_str(), addr);
 
     if(cc(cci)){
         _call(addr);
@@ -1240,7 +1267,7 @@ void cpu::ret(){
 
 //RET CC
 void cpu::ret_cc(unsigned short cci){
-    printf("RET [%s]", cc_to_string(cci));
+    printf("RET %s", cc_to_string(cci).c_str());
 
     tick = tick + 4;
 
@@ -1253,7 +1280,7 @@ void cpu::ret_cc(unsigned short cci){
 
 int main(){
     cpu cpu;
-    printf("RRC [%2s]", cpu.reg_to_string(3));
+    printf("RRC %s", cpu.reg_to_string(3).c_str());
 
     return EXIT_SUCCESS;
 }

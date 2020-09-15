@@ -106,56 +106,64 @@ bool cpu::f_c(){
 
 //Convert 8-bit register index to name
 std::string cpu::reg_to_string(int idx){
+
+	std::string reg8;
+
 	switch(idx){
 		case 0:
-			return "B";
+			reg8 = "B";
 			break;
 		case 1:
-			return "C";
+			reg8 = "C";
 			break;
 		case 2:
-			return "D";
+			reg8 = "D";
 			break;
 		case 3:
-			return "E";
+			reg8 = "E";
 			break;
 		case 4:
-			return "H";
+			reg8 = "H";
 			break;
 		case 5:
-			return "L";
+			reg8 = "L";
 			break;
 		case 6:
-			return "HL";
+			reg8 = "HL";
 			break;
 		case 7:
-			return "A";
+			reg8 = "A";
 			break;
 		default:
 			printf("Invalid Operand index %d", idx);
 			break;
 	}
+	return reg8;
 }
 
 //Convert 16-bit register index to name
 std::string cpu::reg16_to_string(int idx){
+
+	std::string reg16;
+
 	switch(idx){
 		case 0:
-			return "BC";
+			reg16 = "BC";
 			break;
 		case 1:
-			return "DE";
+			reg16 = "DE";
 			break;
 		case 2:
-			return "HL";
+			reg16 = "HL";
 			break;
 		case 3:
-			return "SP";
+			reg16 = "SP";
 			break;
 		default:
 			printf("Invalid Operand index %d", idx);
 			break;
 	}
+	return reg16;
 }
 
 
@@ -197,37 +205,41 @@ void cpu::write_r8(int idx, int val){
 
 //Read 8-bit operand
 int cpu::read_r8(int idx){
+
+	int operand;
+
 	switch(idx){
 		case 0:
-			return b;
+			operand = b;
 			break;
 		case 1:
 			return c;
 			break;
 		case 2:
-			return d;
+			operand = d;
 			break;
 		case 3:
-			return e;
+			operand = e;
 			break;
 		case 4:
-			return h;
+			operand = h;
 			break;
 		case 5:
-			return l;
+			operand = l;
 			break;
 		case 6:{
 			int hl_val = hl();
-			read_mem8(hl_val);
+			operand = read_mem8(hl_val);
 			break;
 		}
 		case 7:
-			return a;
+			operand = a;
 			break;
 		default:
 			printf("Invalid Operand index %d", idx);
 			break;
 	}
+	return operand;
 }
 
 //Write 16-bit operand
@@ -253,26 +265,30 @@ void cpu::write_r16(int idx, int val){
 
 //Read 16-bit operand
 int cpu::read_r16(int idx){
+	int operand;
+
 	switch(idx){
 		case 0:
-			return bc();
+			operand =  bc();
 			break;
 		case 1:
-			return de();
+			operand = de();
 			break;
 		case 2:
-			return hl();
+			operand = hl();
 			break;
 		case 3:
-			return sp;
+			operand = sp;
 			break;
 		default:
 			printf("Invalid Operand Index %d", idx);
 	}
+	return operand;
 }
+
 //Read 8-bit immediate from memory
 short cpu::read_d8(){
-	int pc = pc;
+	//unsigned int pc = pc;
 	int imm = read_mem8(pc);
 	pc = pc + 1;
 
@@ -289,38 +305,49 @@ int cpu::read_d16(){
 
 //Checks branch condition
 bool cpu::cc(int idx){
+	bool result;
+
 	switch(idx){
 		case 0:
-			return !f_z();
+			result = !f_z();
 		case 1:
-			return f_z();
+			result = f_z();
 		case 2:
-			return !f_c();
+			result = !f_c();
 		case 3:
-			return f_c();
+			result = f_c();
 		default:
 			printf("Invalid Operand index %d", idx);
 	}
+	return result;
 }
 
 //Convert branch condition to name
 std::string cpu::cc_to_string(int idx){
+	std::string result;
+
 	switch(idx){
 		case 0:
-			return "NZ";
+			//return "NZ";
+			result = "NZ";
 			break;
 		case 1:
-			return "Z";
+			//return "Z";
+			result = "Z";
 			break;
 		case 2:
-			return "NC";
+			//return "NC";
+			result = "NC";
 			break;
 		case 3:
-			return "C";
+			//return "C";
+			result = "C";
 			break;
 		default:
 			printf("Invalid branch condition index %d", idx);
+			break;
 	}
+	return result;
 }
 
 
@@ -444,7 +471,7 @@ void cpu::ld_hl_sp_d8(){
 
 //AND r8
 void cpu::and_r8(short reg){
-	printf("AND %s", reg_to_string(reg)); //ayashii...
+	printf("AND %s", reg_to_string(reg).c_str()); //ayashii...
 
 	int res = a & read_r8(reg);
 	a = res;
@@ -455,9 +482,23 @@ void cpu::and_r8(short reg){
 	set_f_c(false);
 }
 
+//AND d8
+void cpu::and_d8(){
+    unsigned short val = read_d8();
+    printf("AND 0x%02x", val);
+
+    unsigned short res = a & val;
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(true);
+    set_f_c(false);
+}
+
 //OR r8
 void cpu::or_r8(short reg){
-	printf("OR %s", reg_to_string(reg)); //ayashii...
+	printf("OR %s", reg_to_string(reg).c_str()); //ayashii...
 
 	int res = a | read_r8(reg);
 	a = res;
@@ -468,9 +509,23 @@ void cpu::or_r8(short reg){
 	set_f_c(false);
 }
 
+//OR d8
+void cpu::or_d8(){
+    unsigned short val = read_d8();
+    printf("OR 0x%02x", val);
+
+    unsigned short res = a | val;
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(false);
+}
+
 //XOR r8
 void cpu::xor_r8(short reg){
-	printf("XOR %s", reg_to_string(reg));
+	printf("XOR %s", reg_to_string(reg).c_str());
 
 	int res = a ^ read_r8(reg);
 	a = res;
@@ -481,9 +536,23 @@ void cpu::xor_r8(short reg){
 	set_f_c(false);
 }
 
+//XOR d8
+void cpu::xor_d8(){
+    unsigned short val = read_d8();
+    printf("XOR 0x%02x", val);
+
+    unsigned short res = a ^ val;
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(false);
+}
+
 //CP r8
 void cpu::cp_r8(short reg){
-	printf("CP %s", reg_to_string(reg));
+	printf("CP %s", reg_to_string(reg).c_str());
 
 	int a = a;
 	int val = read_r8(reg);
@@ -492,6 +561,17 @@ void cpu::cp_r8(short reg){
 	set_f_n(true);
 	set_f_h(a & 0x0F < val & 0x0F);
 	set_f_c(a < val);	
+}
+
+//CP d8
+void cpu::cp_d8(){
+    unsigned short imm = read_d8();
+    printf("CP 0x%02x", imm);
+
+    set_f_z(a == imm);
+    set_f_n(true);
+    set_f_h(a & 0x0f < imm & 0x0f);
+    set_f_c(a < imm);
 }
 
 //Decimal adjust re;gister A
@@ -576,7 +656,7 @@ void cpu::add(short val){
 //ADD r8
 void cpu::add_r8(unsigned short reg){
 	unsigned short val = read_r8(reg);
-	printf("ADD %d", reg_to_string(reg));
+	printf("ADD %s", reg_to_string(reg).c_str());
 
 	add(val);
 }
@@ -620,7 +700,7 @@ void cpu::adc(unsigned short val){
 //ADC r8
 void cpu::adc_r8(unsigned short reg){
 	unsigned short val = read_r8(reg);
-	printf("ADC %d", reg_to_string(reg));
+	printf("ADC %s", reg_to_string(reg).c_str());
 
 	adc(val);
 }
@@ -634,4 +714,601 @@ void cpu::sub(unsigned short val){
 	}
 }
 
+<<<<<<< HEAD
+=======
+//ADC d8
+void cpu::adc_d8(){
+    unsigned short val = read_d8();
+    printf("ADC 0x%02x", val);
+
+    adc(val);
+}
+
+
+void cpu::sub(unsigned short val){
+    bool half_carry = (a & 0xf) < (val & 0xf);
+    bool carry = (a & 0xf) - (val & 0xf) < 0x0;
+    
+    unsigned short res;
+    if(carry){
+        res = 0;
+    }else{
+        res = (a & 0xf) - (val & 0xf);
+    }
+    
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(true);
+    set_f_h(half_carry);
+    set_f_c(carry);
+}
+
+
+//SUB r8
+void cpu::sub_r8(unsigned short reg){
+    unsigned short val = read_r8(reg);
+
+    printf("SUB %s", reg_to_string(reg).c_str());
+
+    sub(val);
+}
+
+//SUB d8
+void cpu::sub_d8(){
+    unsigned int val = read_d8();
+
+    printf("SUB 0x%02X", val);
+
+    sub(val);
+}    
+
+void cpu::sbc(unsigned short val){
+    unsigned short c;
+    if(f_c()){
+        c = 1;
+    }else{
+        c = 0;
+    }
+
+    bool half_carry = (a & 0xf) < (val & 0xf) + c;
+    bool carry = (a & 0xff) < (val & 0xff) + c;
+
+    unsigned short res;
+    if((a & 0xff) - (val & 0xff) - c < 0){
+        res = 0;
+    }else{
+        res = (a & 0xff) - (val & 0xff) - c;
+    }
+
+    a = res;
+
+    set_f_z(res == 0);
+    set_f_n(true);
+    set_f_h(half_carry);
+    set_f_c(carry);
+
+}
+
+//SBC r8
+void cpu::sbc_r8(unsigned short reg){
+    unsigned short val = read_r8(reg);
+
+    printf("SBC %s", reg_to_string(reg).c_str());
+
+    sbc(val);
+}
+
+//SBC d8
+void cpu::sbc_d8(){
+    unsigned int val = read_d8();
+    printf("SBC 0x%02x", val);
+
+    sbc(val);
+}
+
+//ADD d8
+void cpu::add_d8(){
+    unsigned short val = read_d8();
+
+    printf("ADD 0x%02x", val);
+
+    add(val); 
+}
+
+//LDI HL, A
+void cpu::ldi_hl_a(){
+    printf("LD (HL+), A");
+
+    unsigned int addr = hl();
+    write_mem8(addr, a);
+    unsigned int hll = hl();
+    if(hll + 1 > 0xffff){
+        set_hl(0);
+    }else{
+        set_hl(hll + 1);    
+    }
+} 
+
+//LDD HL, A
+void cpu::ldd_hl_a(){
+    printf("LD (HL-), A");
+
+    unsigned int addr = hl();
+    write_mem8(addr, a);
+    unsigned int hll = hl();
+    if(hll - 1 < 0){          //ayashii.....
+        set_hl(0xffff);
+    }else{
+        set_hl(hll - 1);
+    }
+}
+
+//LDI A, HL
+void cpu::ldi_a_hl(){
+    printf("LD A, (HL+)");
+
+    unsigned int addr = hl();
+    a = read_mem8(addr);
+    unsigned int hll = hl();
+    if(hll + 1 > 0xffff){
+        set_hl(0);
+    }else{
+        set_hl(hll + 1);
+    }
+}
+
+//LDD A, HL
+void cpu::ldd_a_hl(){
+    printf("LD A, (HL-)");
+
+    unsigned int addr = hl();
+    a = read_mem8(addr);
+    unsigned int hll = hl();
+    if(hll - 1 < 0){
+        set_hl(0xffff);
+    }else{
+        set_hl(hll - 1);
+    }
+}
+
+//LD ind BC, A
+void cpu::ld_ind_bc_a(){
+    printf("LD (BC), A");
+
+    unsigned int addr = bc();
+    write_mem8(addr, a);
+}
+
+//LD ind DE, A
+void cpu::ld_ind_de_a(){
+    printf("LD (DE), A");
+
+    unsigned int addr = de();
+    write_mem8(addr, a);
+}
+
+//LD ind A, BC
+void cpu::ld_ind_a_bc(){
+    printf("LD A, (BC)");
+
+    unsigned int bcc = bc();
+    a = read_mem8(bcc);
+}
+
+//LD ind A, DE
+void cpu::ld_ind_a_de(){
+    printf("LD A, (DE)");
+
+    unsigned int dee = de();
+    a = read_mem8(dee);
+}
+
+//Test bit
+void cpu::bit(unsigned short pos, unsigned short reg){
+    printf("BIT %d, %s", pos, reg_to_string(reg).c_str());
+    bool z = (read_r8(reg) >> pos & 1) == 0;
+
+    set_f_z(z);
+    set_f_n(false);
+    set_f_h(true);
+}
+
+//Set bit
+void cpu::set(unsigned short pos, unsigned short reg){
+    printf("SET %d, %s", pos, reg_to_string(reg).c_str());
+
+    unsigned short val = read_r8(reg);
+    write_r8(reg, val | (1 << pos));
+}
+
+//Reset bit
+void cpu::res(unsigned short pos, unsigned short reg){
+    printf("RES %d, %s", pos, reg_to_string(reg).c_str());
+
+    unsigned short val = read_r8(reg);
+    write_r8(reg, val & !(1 << pos));
+}
+
+
+void cpu::_rl(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if((orig << 1) || (f_c())){
+        res = 1;
+    }else{
+        res = 0;
+    }
+
+    write_r8(reg,res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig >> 7 & 1 == 1);
+}
+
+//Rotate left through carry
+void cpu::rl(unsigned short reg){
+    printf("RL %s", reg_to_string(reg).c_str());
+
+    _rl(reg);
+}
+
+void cpu::_rlc(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res = orig << 1;
+    write_r8(reg, res);
+
+    set_f_z(res);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig >> 7 & 1 == 1);
+
+}
+
+//Rotate left
+void cpu::rlc(unsigned short reg){
+    printf("RLC %s", reg_to_string(reg).c_str());
+
+    rlc(reg);
+}
+
+void cpu::_rr(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if(f_c()){
+        res = (orig >> 1) | 1 << 7;
+    }else{
+        //res = (orig >> 1) | 0 << 7;
+        res = (orig >> 1) | 0;
+    }
+
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 == 1);
+}
+
+//Rotate right through carry
+void cpu::rr(unsigned short reg){
+    printf("RR %s", reg_to_string(reg).c_str());
+
+    _rr(reg);
+}
+
+void cpu::_rrc(unsigned short reg){
+    unsigned short orig = read_r8(reg);
+    unsigned short res = orig >> 1;
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 == 1);
+}
+
+//Rotate right
+void cpu::rrc(unsigned short reg){
+    printf("RRC %s", reg_to_string(reg).c_str());
+
+    _rrc(reg);
+}
+
+//Shift left into carry
+void cpu::sla(unsigned short reg){
+    printf("SLA %2s", reg_to_string(reg).c_str());
+    
+    unsigned short orig = read_r8(reg);
+    unsigned int res = orig << 1;
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 0x80 > 0);
+}
+
+//Shift right into carry
+void cpu::sra(unsigned short reg){
+    printf("SRA %2s", reg_to_string(reg).c_str());
+
+    unsigned short orig = read_r8(reg);
+    unsigned short res = (orig >> 1) | (orig & 0x80);
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 > 0);
+}
+
+//Swap low/hi-nibble
+void cpu::swap(unsigned short reg){
+    printf("SWAP %2s", reg_to_string(reg).c_str());
+
+    unsigned short orig = read_r8(reg);
+    unsigned int res = ((orig & 0x0f) << 4) | ((orig & 0xf0) >> 4);
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(false);
+}
+
+//Shift right through carry
+void cpu::srl(unsigned short reg){
+    printf("SRL %2s", reg_to_string(reg).c_str());
+
+    unsigned short orig = read_r8(reg);
+    unsigned int res = orig >> 1;
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_n(false);
+    set_f_h(false);
+    set_f_c(orig & 1 == 1);
+}
+
+void cpu::_jp(unsigned int addr){
+    pc = addr;
+
+    tick = tick + 4;
+}
+
+void cpu::jp_cc_d8(unsigned short cci){
+    unsigned int addr = read_d16();
+
+    printf("JP %s, %04x", cc_to_string(cci).c_str(), addr);
+
+    if(cc(cci)){
+        _jp(addr);
+    }
+}
+
+//Unconditional jump to d16
+void cpu::jp_d16(){
+    unsigned int address = read_d16();
+
+    printf("JP %04x", address);
+
+    _jp(address);
+}
+
+//Jump to pc+d8 if CC
+void cpu::jr_cc_d8(unsigned short cci){
+    int offset = read_d8();
+
+    printf("JR %s %d", cc_to_string(cci).c_str(), offset);
+
+    if(cc(cci)){
+        _jr(offset);
+    }
+}
+
+void cpu::_jr(short offset){
+    if(pc + offset > 0xffff){
+        pc = pc + offset - 0xffff;
+    }else{
+        pc = pc + offset;
+    }
+
+    tick = tick + 4;
+}
+
+//Jump to pc+d8
+void cpu::jr_d8(){
+    short offset = read_d8();
+    printf("JR [%d]", offset);
+
+    _jr(offset);
+}
+
+void cpu::ld_io_d8_a(){
+    unsigned int offset = read_d8();
+    unsigned int addr  = 0xff00 | offset;
+
+    printf("LD (0xff00+0x[%02x]), A", offset);
+
+    write_mem8(addr, a);
+}
+
+void cpu::ld_io_c_a(){
+    unsigned int addr = 0xff00 | c;
+    printf("LD (0xff00 + C), A");
+    
+    write_mem8(addr, a);
+}
+
+void cpu::ld_a_io_c(){
+    unsigned int addr = 0xff00 | c;
+    printf("LD A, (0xff00 + c)");
+
+    a = read_mem8(addr);
+}
+
+void cpu::ld_r8_d8(unsigned short reg){
+    unsigned short imm = read_d8();
+    printf("LD %s, 0x[%02x]", reg_to_string(reg).c_str(), imm);
+
+    write_r8(reg, imm);
+}
+
+//INC r8
+void cpu::inc_r8(unsigned short reg){
+    printf("INC %s", reg_to_string(reg).c_str());
+
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if(orig + 1 > 0xff){
+        res = 0;
+    }else{
+        res = orig + 1;
+    }
+
+    write_r8(reg, res);
+
+    set_f_z(res == 0);
+    set_f_h(orig & 0x0f == 0x0f);
+    set_f_n(false);
+}
+
+//DEC r8
+void cpu::dec_r8(unsigned short reg){
+    printf("DEC %s", reg_to_string(reg).c_str());
+
+    unsigned short orig = read_r8(reg);
+    unsigned short res;
+
+    if(orig - 1 < 0){
+        res = 0xff;
+    }else{
+        res = orig - 1;
+    }
+
+    set_f_z(res == 0);
+    set_f_h(orig & 0x0f == 0x00);
+    set_f_n(true);
+}
+
+//LD r8, r8
+void cpu::ld_r8_r8(unsigned short reg1, unsigned short reg2){
+    printf("LD %s, %s", reg_to_string(reg1).c_str(), reg_to_string(reg2).c_str());
+
+    unsigned short val = read_r8(reg2);
+    write_r8(reg1, val);
+}
+
+void cpu::_call(unsigned int addr){
+    if(sp - 1 < 0){
+        sp = 0xff;
+        sp = sp - 1;
+    }else{
+        sp = sp - 1;
+        if(sp - 1 < 0){
+            sp = 0xff;
+        }else{
+            sp = sp - 1;
+        }
+    }
+    
+    tick = tick + 4;
+
+    write_mem16(sp, pc);
+    pc = addr;
+}
+
+//CALL d16
+void cpu::call_d16(){
+    unsigned int addr = read_d16();
+
+    printf("CALL [%x]",  addr);
+
+    _call(addr);
+}
+
+//CALL CC, d16
+void cpu::call_cc_d16(unsigned short cci){
+    unsigned int addr = read_d16();
+
+    printf("CALL %s, 0x[%04x]", cc_to_string(cci).c_str(), addr);
+
+    if(cc(cci)){
+        _call(addr);
+    }
+}
+
+void cpu::rst(unsigned short addr){
+    printf("RST 0x[%02x]", addr);
+
+    _call(addr);
+}
+
+void cpu::_ret(){
+    pc = read_mem16(sp);
+    
+    if(sp + 1 > 0xff){
+        sp = 0;
+        sp = sp + 1;
+    }else{
+        sp = sp + 1;
+        if(sp + 1 > 0xff){
+            sp = 0;
+        }else{
+            sp = sp + 1;
+        }
+    }
+
+    tick = tick + 4;
+}
+
+//RET
+void cpu::ret(){
+    printf("RET");
+
+    _ret();
+}
+
+//RET CC
+void cpu::ret_cc(unsigned short cci){
+    printf("RET %s", cc_to_string(cci).c_str());
+
+    tick = tick + 4;
+
+    if(cc(cci)){
+        _ret();
+    }
+}
+
+
+
+int main(){
+    cpu cpu;
+    printf("RRC %s", cpu.reg_to_string(3).c_str());
+
+    return EXIT_SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> origin/dev
 

@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <vector>
 
@@ -55,18 +56,71 @@ public:
     void add_sp_d8();
     void ld_hl_sp_d8();
     void and_r8(short reg);
+    void and_d8();
     void or_r8(short reg);
+    void or_d8();
     void xor_r8(short reg);
+    void xor_d8();
     void cp_r8(short reg);
+    void cp_d8();
     void daa();
     void cpl();
     void ccf();
     void scf();
     void add(short val);
     void add_r8(unsigned short reg);
+    void sub_r8(unsigned short reg);
+    void sub_d8();
     void adc(unsigned short val);
     void adc_r8(unsigned short reg);
-
-
+    void adc_d8();
+    void sub(unsigned short val);
+    void sbc(unsigned short val);
+    void sbc_r8(unsigned short reg);
+    void sbc_d8();
+    void add_d8();
+    void ldi_hl_a();
+    void ldd_hl_a();
+    void ldi_a_hl();
+    void ldd_a_hl();
+    void ld_ind_bc_a();
+    void ld_ind_de_a();
+    void ld_ind_a_bc();
+    void ld_ind_a_de();
+    void bit(unsigned short pos, unsigned short reg);
+    void set(unsigned short pos, unsigned short reg);
+    void res(unsigned short res, unsigned short reg);
+    void _rl(unsigned short reg);
+    void rl(unsigned short reg);
+    void _rlc(unsigned short reg);
+    void rlc(unsigned short reg);
+    void _rr(unsigned short reg);
+    void rr(unsigned short reg);
+    void _rrc(unsigned short reg);
+    void rrc(unsigned short reg);
+    void sla(unsigned short reg);
+    void sra(unsigned short reg);
+    void swap(unsigned short reg);
+    void srl(unsigned short reg);
+    void _jp(unsigned int addr);
+    void jp_cc_d8(unsigned short cci);
+    void jp_d16();
+    void jr_cc_d8(unsigned short cci);
+    void _jr(short offset);
+    void jr_d8();
+    void ld_io_d8_a();
+    void ld_io_c_a();
+    void ld_a_io_c();
+    void ld_r8_d8(unsigned short reg);
+    void inc_r8(unsigned short reg);
+    void dec_r8(unsigned short reg);
+    void ld_r8_r8(unsigned short reg1, unsigned short reg2);
+    void _call(unsigned int addr);
+    void call_d16();
+    void call_cc_d16(unsigned short cci);
+    void rst(unsigned short addr);
+    void _ret();
+    void ret();
+    void ret_cc(unsigned short cci);
 
 };

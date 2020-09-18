@@ -17,7 +17,11 @@ public:
     bool ime = false;
     int tick = 0;
     bool halted = 0;
+    unsigned short step();
+    void dump();
 
+
+private:
     int af();
     void set_af(int val);
     int bc();
@@ -105,10 +109,12 @@ public:
     void _jp(unsigned int addr);
     void jp_cc_d8(unsigned short cci);
     void jp_d16();
+    void jp_hl();
     void jr_cc_d8(unsigned short cci);
     void _jr(short offset);
     void jr_d8();
     void ld_io_d8_a();
+    void ld_a_io_d8();
     void ld_io_c_a();
     void ld_a_io_c();
     void ld_r8_d8(unsigned short reg);
@@ -122,5 +128,28 @@ public:
     void _ret();
     void ret();
     void ret_cc(unsigned short cci);
-
+    void push_bc();
+    void push_de();
+    void push_hl();
+    void push_af();
+    void pop_bc();
+    void pop_de();
+    void pop_hl();
+    void pop_af();
+    void rlca();
+    void rla();
+    void rrca();
+    void rra();
+    void inc_r16(unsigned short reg);
+    void dec_r16(unsigned short reg);
+    void ld_ind_d16_a();
+    void ld_a_ind_d16();
+    void di();
+    void ei();
+    void reti();
+    void prefix();
+    void halt();
+    void check_irqs();
+    void call_isr(short id);
+    void fetch_and_exec();
 };

@@ -705,17 +705,6 @@ void cpu::adc_r8(unsigned short reg){
 	adc(val);
 }
 
-void cpu::sub(unsigned short val){
-	bool half_carry = (a & 0xf) < (val & 0xf);
-
-	short res;
-	if(a - val < 0){
-		res = a - val 
-	}
-}
-
-<<<<<<< HEAD
-=======
 //ADC d8
 void cpu::adc_d8(){
     unsigned short val = read_d8();
@@ -1047,7 +1036,7 @@ void cpu::sra(unsigned short reg){
     set_f_c(orig & 1 > 0);
 }
 
-//Swap low/hi-nibble
+//Swap low/hi-nibble *nibble = 4bit
 void cpu::swap(unsigned short reg){
     printf("SWAP %2s", reg_to_string(reg).c_str());
 
@@ -1100,6 +1089,13 @@ void cpu::jp_d16(){
     _jp(address);
 }
 
+//Unconditional jump to HL
+void cpu::jp_hl(){
+	printf("JP (HL)");
+
+	pc = hl();
+}
+
 //Jump to pc+d8 if CC
 void cpu::jr_cc_d8(unsigned short cci){
     int offset = read_d8();
@@ -1136,6 +1132,15 @@ void cpu::ld_io_d8_a(){
     printf("LD (0xff00+0x[%02x]), A", offset);
 
     write_mem8(addr, a);
+}
+
+void cpu::ld_a_io_d8(){
+	unsigned int offset = read_d8();
+	unsigned int addr = 0xff00 | offset;
+
+	printf("LD A, 0xff00+0x%02x", offset);
+
+	a = read_mem8(addr);
 }
 
 void cpu::ld_io_c_a(){
@@ -1286,29 +1291,730 @@ void cpu::ret_cc(unsigned short cci){
     }
 }
 
+//PUSH BC
+void cpu::push_bc(){
+	printf("PUSH BC");
 
+	if(sp - 1 < 0){
+      sp = 0xff;
+      sp = sp - 1;
+  }else{
+      sp = sp - 1;
+      if(sp - 1 < 0){
+          sp = 0xff;
+      }else{
+          sp = sp - 1;
+      }
+  }
 
-int main(){
-    cpu cpu;
-    printf("RRC %s", cpu.reg_to_string(3).c_str());
+  unsigned int val = bc();
 
-    return EXIT_SUCCESS;
+  tick = tick + 4;
+
+  write_mem16(sp, val);
+}
+
+//PUSH DE
+void cpu::push_de(){
+	  printf("PUSH DE");
+
+	  if(sp - 1 < 0){
+        sp = 0xff;
+        sp = sp - 1;
+    }else{
+        sp = sp - 1;
+        if(sp - 1 < 0){
+            sp = 0xff;
+        }else{
+            sp = sp - 1;
+        }
+    }
+
+    unsigned int val = de();
+
+    tick = tick + 4;
+
+    write_mem16(sp, val);
+}
+
+//PUSH HL
+void cpu::push_hl(){
+	  printf("PUSH HL");
+
+	  if(sp - 1 < 0){
+        sp = 0xff;
+        sp = sp - 1;
+    }else{
+        sp = sp - 1;
+        if(sp - 1 < 0){
+            sp = 0xff;
+        }else{
+            sp = sp - 1;
+        }
+    }
+
+    unsigned int val = hl();
+
+    tick = tick + 4;
+
+    write_mem16(sp, val);
+}
+
+//PUSH AF
+void cpu::push_af(){
+	  printf("PUSH AF");
+
+	  if(sp - 1 < 0){
+        sp = 0xff;
+        sp = sp - 1;
+    }else{
+        sp = sp - 1;
+        if(sp - 1 < 0){
+            sp = 0xff;
+        }else{
+            sp = sp - 1;
+        }
+    }
+
+    unsigned int val = af();
+
+    tick = tick + 4;
+
+    write_mem16(sp, val);
+}
+
+//POP BC
+void cpu::pop_bc(){
+	printf("POP BC");
+
+	unsigned int val = read_mem16(sp);
+	set_bc(val);
+
+  if(sp + 1 > 0xff){
+      sp = 0;
+      sp = sp + 1;
+  }else{
+      sp = sp + 1;
+      if(sp + 1 > 0xff){
+          sp = 0;
+      }else{
+          sp = sp + 1;
+      }
+  }
 }
 
 
+//POP DE
+void cpu::pop_de(){
+	printf("POP DE");
+
+	unsigned int val = read_mem16(sp);
+	set_de(val);
+
+  if(sp + 1 > 0xff){
+      sp = 0;
+      sp = sp + 1;
+  }else{
+      sp = sp + 1;
+      if(sp + 1 > 0xff){
+          sp = 0;
+      }else{
+          sp = sp + 1;
+      }
+  }
+}
+
+//POP HL
+void cpu::pop_hl(){
+	printf("POP HL");
+
+	unsigned int val = read_mem16(sp);
+	set_hl(val);
+
+  if(sp + 1 > 0xff){
+      sp = 0;
+      sp = sp + 1;
+  }else{
+      sp = sp + 1;
+      if(sp + 1 > 0xff){
+          sp = 0;
+      }else{
+          sp = sp + 1;
+      }
+  }
+}
+
+//POP AF
+void cpu::pop_af(){
+	printf("POP AF");
+
+	// lower nibble of F is always zero
+	unsigned int val = read_mem16(sp) & 0xfff0;
+	set_af(val);
+
+  if(sp + 1 > 0xff){
+      sp = 0;
+      sp = sp + 1;
+  }else{
+      sp = sp + 1;
+      if(sp + 1 > 0xff){
+          sp = 0;
+      }else{
+          sp = sp + 1;
+      }
+  }
+}
+
+void cpu::rlca(){
+	printf("RLCA");
+
+	_rlc(7);
+	set_f_z(false);
+}
+
+void cpu::rla(){
+	printf("RLA");
+
+	_rl(7);
+	set_f_z(false);
+}
+
+void cpu::rrca(){
+	printf("RRCA");
+
+	_rrc(7);
+	set_f_z(false);
+}
+
+void cpu::rra(){
+	printf("RRA");
+
+	_rr(7);
+	set_f_z(false);
+}
+
+void cpu::inc_r16(unsigned short reg){
+	printf("INC %s", reg16_to_string(reg));
+
+	unsigned int val = read_r16(reg);
+
+	if(val + 1 > 0xff){
+		val = 0;
+	}else{
+		val = val + 1;
+	}
+
+	write_r16(reg, val);
+
+	tick = tick + 4;
+}
+
+void cpu::dec_r16(unsigned short reg){
+	printf("DEC %s", reg16_to_string(reg));
+
+	unsigned int val = read_r16(reg);
+
+	if(val - 1 < 0){
+		val = 0xff;
+	}else{
+		val = val - 1;
+	}
+
+	write_r16(reg, val);
+
+	tick = tick + 4;
+}
+
+void cpu::ld_ind_d16_a(){
+	unsigned int addr = read_d16();
+	printf("LD 0x%04x, A", addr);
+
+	write_mem8(addr, a);
+}
+
+void cpu::ld_a_ind_d16(){
+	unsigned int addr = read_d16();
+	printf("LD A, 0x%04x", addr);
+
+	a = read_mem8(addr);
+}
+
+//Disable interrupt
+void cpu::di(){
+	printf("DI");
+
+	ime = false;
+}
+
+//Enable interrupt
+void cpu::ei(){
+	printf("EI");
+
+	ime = true;
+}
+
+//Enable interrupt and return
+void cpu::reti(){
+	printf("RETI");
+
+	ime = true;
+
+	_ret();
+}
+
+//Prefixed instructions
+void cpu::prefix(){
+	unsigned short opcode = read_d8();
+	unsigned int pos = opcode >> 3 & 0x7;
+	unsigned int reg = opcode & 0x7;
+
+	if(0x00 <= opcode <= 0x07){
+		rlc(reg);
+	}else if(0x08 <= opcode <= 0x0f){
+		rrc(reg);
+	}else if(0x10 <= opcode <= 0x17){
+		rl(reg);
+	}else if(0x18 <= opcode <= 0x1f){
+		rr(reg);
+	}else if(0x20 <= opcode <= 0x27){
+		sla(reg);
+	}else if(0x28 <= opcode <= 0x2f){
+		sra(reg);
+	}else if(0x30 <= opcode <= 0x37){
+		swap(reg);
+	}else if(0x38 <= opcode <= 0x3f){
+		srl(reg);
+	}else if(0x40 <= opcode <= 0x7f){
+		bit(pos, reg);
+	}else if(0x80 <= opcode <= 0xbf){
+		res(pos, reg);
+	}else if(0xc0 <= opcode <= 0xff){
+		set(pos, reg);
+	}else{
+		printf("Unimplemented opcode 0xcb 0x%x", opcode);
+	}
+}
+
+//HALT
+void cpu::halt(){
+	printf("HALT");
+
+	if(ime){
+		halted = true;
+	}
+}
 
 
+//[public] Execute a single instruction and handle IRQs.
+unsigned short cpu::step(){
+	unsigned short total_tick = 0;
+	tick = 0;
+
+	if(halted){
+		tick = tick + 4;
+	}else{
+		fetch_and_exec();
+	}
+
+	total_tick = total_tick + tick;
+
+	mmu.update(tick);
+
+	if(ime){
+		tick = 0;
+		check_irqs();
+		mmu.update(tick);
+
+		total_tick = total_tick + tick;
+	}
+
+	return total_tick;
+}
+
+//Check IRQs and execute ISRs if rewuested.
+void cpu::check_irqs(){
+	//Bit 0 has the highest priority
+	for(int i = 0; i < 6; i = i + 1){
+		bool irq = mmu.int_flag & (1 << i) > 0;
+		bool ie = mmu.int_enable & (1 << i) > 0;
+
+		//If interrupt is requested and enabled
+		if(irq && ie){
+			call_isr(i);
+			break;
+		}
+	}
+}
+
+//Calls requested interrupt service routine.
+void cpu::call_isr(short id){
+	//Reset corresponding bit in IF
+	mmu.int_flag &= !(1 << id);
+	//Clear IME(disable any further interrupts)
+	ime = false;
+	halted = false;
+
+	unsigned int isr;
+
+	switch(id){
+		case 1:
+			isr = 0x40;
+			break;
+		case 2:
+			isr = 0x48;
+			break;
+		case 3:
+			isr = 0x50;
+			break;
+		case 4:
+			isr = 0x80;
+			break;
+		default:
+			printf("Invalid IRQ id %d", id);
+			break;
+	}
+
+	tick = tick + 8;
+
+	printf("Calling ISR 0x%02x", isr);
+
+	_call(isr);
+
+} 
 
 
+//Fetches and executes a single instructions.
+void cpu::fetch_and_exec(){
+	unsigned short opcode = read_d8();
+	unsigned short reg = opcode & 7;
+	unsigned short reg2 = opcode >> 3 & 7;
 
+	switch(opcode){
+		//NOP
+		case 0x00:
+			nop();
+			break;
+		//LD r16, d16
+		case 0x01:
+		case 0x11:
+		case 0x21:
+		case 0x31:
+			ld_r16_d16(opcode >> 4);
+			break;
+		//LD (d16), SP
+		case 0x08:
+			ld_ind_d16_sp();
+			break;
+		//LD SP, HL
+		case 0xf9:
+			ld_sp_hl();
+		//LD A, r16
+		case 0x02:
+			ld_ind_bc_a();
+			break;
+		case 0x12:
+			ld_ind_de_a();
+			break;
+		case 0x0a:
+			ld_ind_a_bc();
+			break;
+		case 0x1a:
+			ld_ind_a_de();
+			break;
+		//PUSH r16
+		case 0xc5:
+			push_bc();
+			break;
+		case 0xd5:
+			push_de();
+			break;
+		case 0xe5:
+			push_hl();
+			break;
+		case 0xf5:
+			push_af();
+			break;
+		//POP r16
+		case 0xc1:
+			pop_bc();
+			break;
+		case 0xd1:
+			pop_de();
+			break;
+		case 0xe1:
+			pop_hl();
+			break;
+		case 0xf1:
+			pop_af();
+			break;
+		//Conditional absolute jump
+		case 0xc2:
+		case 0xd2:
+		case 0xca:
+		case 0xda:
+			jp_cc_d8(reg2);
+			break;
+		//Unconditional absolute jump
+		case 0xc3:
+			jp_d16();
+			break;
+		case 0xe9:
+			jp_hl();
+			break;
+		//Conditional relative jump
+		case 0x20:
+		case 0x30:
+		case 0x28:
+		case 0x38:
+			jr_cc_d8(reg2 - 4);
+			break;
+		//Unconditional relative jump
+		case 0x18:
+			jr_d8();
+			break;
+		//Bit rotate on A
+		case 0x07:
+			rlca();
+			break;
+		case 0x17:
+			rla();
+			break;
+		case 0x0f:
+			rrca();
+			break;
+		case 0x1f:
+			rra();
+			break;
+		//Arithmethic/logical operation on 16-bit register
+		case 0x09:
+		case 0x19:
+		case 0x29:
+		case 0x39:
+			add_hl_r16(opcode >> 4);
+			break;
+		case 0xe8:
+			add_sp_d8();
+			break;
+		case 0xf8:
+			ld_hl_sp_d8();
+			break;
+		//Arithmethic/logical operation on 8-bit register
+		case 0x80 ... 0x87:
+			add_r8(reg);
+			break;
+		case 0x88 ... 0x8f:
+			adc_r8(reg);
+			break;
+		case 0x90 ... 0x97:
+			sub_r8(reg);
+			break;
+		case 0x98 ... 0x9f:
+			sbc_r8(reg);
+			break;
+		case 0xa0 ... 0xa7:
+			and_r8(reg);
+			break;
+		case 0xb0 ... 0xb7:
+			or_r8(reg);
+			break;
+		case 0xa8 ... 0xaf:
+			xor_r8(reg);
+			break;
+		case 0xb8 ... 0xbf:
+			cp_r8(reg);
+			break;
+		//DAA
+		case 0x27:
+			daa();
+			break;
+		//CPL
+		case 0x2f:
+			cpl();
+			break;
+		//SCF
+		case 0x37:
+			scf();
+			break;
+		//CCF
+		case 0x3f:
+			ccf();
+			break;
+		//Arithmethic/logical operation on A
+		case 0xc6:
+			add_d8();
+			break;
+		case 0xd6:
+			sub_d8();
+			break;
+		case 0xe6:
+			and_d8();
+			break;
+		case 0xf6:
+			or_d8();
+			break;
+		case 0xce:
+			adc_d8();
+			break;
+		case 0xde:
+			sbc_d8();
+			break;
+		case 0xee:
+			xor_d8();
+			break;
+		case 0xfe:
+			cp_d8();
+			break;
+		//LDI
+		case 0x22:
+			ldi_hl_a();
+			break;
+		case 0x2a:
+			ldi_a_hl();
+			break;
+		//LDD
+		case 0x32:
+			ldd_hl_a();
+			break;
+		case 0x3a:
+			ldd_a_hl();
+			break;
+		//LD IO port
+		case 0xe0:
+			ld_io_d8_a();
+			break;
+		case 0xf0:
+			ld_a_io_d8();
+			break;
+		case 0xe2:
+			ld_io_c_a();
+			break;
+		case 0xf2:
+			ld_a_io_c();
+			break;
+		//LD r8, d8
+		case 0x06:
+		case 0x0e:
+		case 0x16:
+		case 0x1e:
+		case 0x26:
+		case 0x2e:
+		case 0x36:
+		case 0x3e:
+			ld_r8_d8(reg2);
+			break;
+		//INC r8
+		case 0x04:
+		case 0x0c:
+		case 0x14:
+		case 0x1c:
+		case 0x24:
+		case 0x2c:
+		case 0x34:
+		case 0x3c:
+			inc_r8(reg2);
+			break;
+		//DEC r8
+		case 0x05:
+		case 0x0d:
+		case 0x15:
+		case 0x1d:
+		case 0x25:
+		case 0x2d:
+		case 0x35:
+		case 0x3d:
+			dec_r8(reg2);
+			break;
+		//LD r8, r8
+		case 0x40 ... 0x75:
+		case 0x77 ... 0x7f:
+			ld_r8_r8(reg2, reg);
+			break;
+		//LD (d16), A
+		case 0xea:
+			ld_ind_d16_a();
+			break;
+		//LD A, (d16)
+		case 0xfa:
+			ld_a_ind_d16();
+			break;
+		//INC r16
+		case 0x03:
+		case 0x13:
+		case 0x23:
+		case 0x33:
+			inc_r16(opcode >> 4);
+			break;
+		//DEC r16
+		case 0x0b:
+		case 0x1b:
+		case 0x2b:
+		case 0x3b:
+			dec_r16(opcode >> 4);
+			break;
+		//Unconditional call
+		case 0xcd:
+			call_d16();
+			break;
+		//Conditioncal call
+		case 0xc4:
+		case 0xd4:
+		case 0xcc:
+		case 0xdc:
+			call_cc_d16(reg2);
+			break;
+		//Unconditional ret
+		case 0xc9:
+			ret();
+			break;
+		//Conditional ret
+		case 0xc0:
+		case 0xd0:
+		case 0xc8:
+		case 0xd8:
+			ret_cc(reg2);
+			break;
+		//RETI
+		case 0xd9:
+			reti();
+			break;
+		//RST
+		case 0xc7:
+		case 0xcf:
+		case 0xd7:
+		case 0xdf:
+		case 0xe7:
+		case 0xef:
+		case 0xf7:
+		case 0xff:
+			rst(opcode - 0xc7);
+			break;
+		//DI
+		case 0xf3:
+			di();
+			break;
+		//EI
+		case 0xfb:
+			ei();
+			break;
+		//CB prefixed
+		case 0xcb:
+			prefix();
+			break;
+		//HALT
+		case 0x76:
+			halt();
+			break;
+		default:
+			printf("Unimplemented opcode 0x%x", opcode);
+			break;
+	}
+} 
 
-
-
-
-
-
-
-
-
->>>>>>> origin/dev
-
+//Dumps current CPU state
+void cpu::dump(){
+	printf("CPU State:");
+	printf("PC: 0x%04x SP: 0x%04x", pc, sp);
+	printf("AF: 0x%04x BC: 0x%04x", af(), bc());
+	printf("DE: 0x%04x HL: 0x%04x", de(), hl());
+	printf("T: %d", tick);
+}

@@ -2018,3 +2018,7 @@ void cpu::dump(){
 	printf("DE: 0x%04x HL: 0x%04x", de(), hl());
 	printf("T: %d", tick);
 }
+
+int main(){
+	
+}

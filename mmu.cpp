@@ -56,27 +56,29 @@ void mmu::write(int addr, int val){
 	}
 }
 
-int mmu::read(int addr){
+unsigned int mmu::read(int addr){
 
 	render render;
 	//cartridge cartridge;
 	//joypad joypad;
 	//timer timer;
 
+	unsigned int temp;
+
 	if(0x0000 <= addr <= 0x7FFF){
 		//return cartridge.read(addr);
 		printf("After Cartridge");
 	}else if(0x8000 <= addr <= 0x9FFF){
-		return render.read(addr);
+		temp = render.read(addr);
 	}else if(0xA000 <= addr <= 0xBFFF){
 		//return cartridge.read(addr);
 		printf("After Cartridge");
 	}else if(0xC000 <= addr <= 0xDFFF){
-		return ram[addr & 0x1FFF];
+		temp =  ram[addr & 0x1FFF];
 	}else if(0xE000 <= addr <= 0xFDFF){
-		return ram[(addr - 0x2000) & 0x1FFF];
+		temp =  ram[(addr - 0x2000) & 0x1FFF];
 	}else if(0xFE00 <= addr <= 0xFE9F){
-		return render.read(addr);
+		temp =  render.read(addr);
 	}else if(addr == 0xFF00){
 		//joypad.read(addr);
 		printf("After Joypad");
@@ -84,16 +86,18 @@ int mmu::read(int addr){
 		//timer.read(addr);
 		printf("After Timer");
 	}else if(addr == 0xFF0F){
-		return int_flag;
+		temp =  int_flag;
 	}else if(0xFF40 <= addr <= 0xFF45 | 0xFF47 <= addr <= 0xFF4B){
-		return render.read(addr);
+		temp =  render.read(addr);
 	}else if(0xFF80 <= addr <= 0xFFFE){
-		return hram[addr & 0x7F];
+		temp =  hram[addr & 0x7F];
 	}else if(addr == 0xFFFF){
-		return int_enable;
+		temp =  int_enable;
 	}else{
-		return 0xFF;
+		temp =  0xFF;
 	}
+
+	return temp;
 }
 
 void mmu::update(int tick){

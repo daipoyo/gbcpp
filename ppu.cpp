@@ -61,8 +61,10 @@ std::tuple<int, int> render::fetch_bg_window_tile(int tile_x, int tile_y, int of
 
 	//render render;
 	//render.fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
-	fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
+	std::tuple<int, int> tuple = fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
+	return tuple;
 }
+
 std::tuple<int, int> render::fetch_bg_tile(int tile_x, int tile_y, int offset_y){
 	int lcdc = a[0xff40];
 	int tile_map_base;
@@ -74,7 +76,8 @@ std::tuple<int, int> render::fetch_bg_tile(int tile_x, int tile_y, int offset_y)
 	}
 
 	//render render;
-	fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
+	std::tuple<int, int> tuple = fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
+	return tuple;
 }
 
 std::tuple<int, int> render::fetch_window_tile(int tile_x, int tile_y, int offset_y){
@@ -88,7 +91,8 @@ std::tuple<int, int> render::fetch_window_tile(int tile_x, int tile_y, int offse
 	}
 
 	//render render;
-	fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
+	std::tuple<int, int> tuple = fetch_bg_window_tile(tile_x, tile_y, offset_y, tile_map_base);
+	return tuple;
 }
 
 int render::map_color(int color_no, int palette){

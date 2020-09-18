@@ -11,7 +11,7 @@ public:
 
     void do_dma(int val);
     void write(int addr, int val);
-    int read(int addr);
+    unsigned int read(int addr);
     void update(int tick);
 
 };

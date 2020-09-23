@@ -1,18 +1,17 @@
-class timer{
+class timer : public io_device{
 public:
 	//Timer counter
-	unsigned short tima;
+	mutable unsigned short tima;
 	//Timer modulo
-	unsigned short tma;
+	mutable unsigned short tma;
 	//Timer control
-	unsigned short tac;
+	mutable unsigned short tac;
 	//Internal 16-bit counter
-	unsigned int counter;
+	mutable unsigned int counter;
 	//Interrupt request
 	bool irq;
 
 private:
-	void write(unsigned int addr, unsigned short val);
-
+	void write(unsigned int addr, unsigned short val) override;
 
 };

@@ -1,7 +1,7 @@
-template<class T, class U>
+//template<class T, class U>
 class io_device{
 public:
-	void write(T addr, U val);
-	unsigned int read(T addr, U val);
-	void update(T tick);
+	virtual void write(unsigned int addr, unsigned short val) = 0;
+	virtual unsigned int read(unsigned int addr, unsigned short val) const = 0;
+	virtual void update(unsigned int tick) const = 0;
 };

@@ -1,4 +1,6 @@
 #include <string>
+#include <iostream>
+#include <windows.h>
 #include "io_device.cpp"
 #include "timer_h.cpp"
 
@@ -21,13 +23,18 @@ void timer::write(unsigned int addr, unsigned short val) {
 			tac = val & 0x7;
 			break;
 		default:
-			printf("Unexpected address: 0x%4x", addr);
+			printf("Unexpected address: 0x%4x\n", addr);
 			break;
 	}
 }
 
 
 int main(){
+	timer *call_timer;
+	printf("%d\n", call_timer->counter);
+	call_timer->write(0xff04, 100);
+	printf("%d\n", call_timer->counter);
 
+	//std::cout << std::string("Hello World").c_str() << std::endl;
 }
 

@@ -10,8 +10,8 @@ public:
 	mutable unsigned int counter;
 	//Interrupt request
 	bool irq;
+	void write(unsigned int addr, unsigned short val);
 
 private:
-	void write(unsigned int addr, unsigned short val) override;
 
 };

@@ -50,12 +50,12 @@ void cpu::set_hl(int val){
 
 //Set Z flag
 void cpu::set_f_z(bool z){
-	f = (f & !(1 << 7)) | z << 7; //if z==true -> z = 1 else if z==false ->z = 0;
+	f = (f & ~(1 << 7)) | z << 7; //if z==true -> z = 1 else if z==false ->z = 0;
 }
 
 //Return Z flag
 bool cpu::f_z(){
-	if((f >> 7) & 1 == 1){
+	if(((f >> 7) & 1 ) == 1){
 		return true;
 	}else{
 		return false;
@@ -64,12 +64,12 @@ bool cpu::f_z(){
 
 //Set N flag
 void cpu::set_f_n(bool n){
-	f = (f & !(1 << 6)) | n << 6;
+	f = (f & ~(1 << 6)) | n << 6;
 }
 
 //Return N flag
 bool cpu::f_n(){
-	if((f >> 6) & 1 == 1){
+	if(((f >> 6) & 1 ) == 1){
 		return true;
 	}else{
 		return false;
@@ -78,12 +78,12 @@ bool cpu::f_n(){
 
 //Set H flag
 void cpu::set_f_h(bool h){
-	f = (f & !(1 << 5)) | h << 5;
+	f = (f & ~(1 << 5)) | h << 5;
 }
 
 //Return H flag
 bool cpu::f_h(){
-	if((f >> 5) & 1 == 1){
+	if(((f >> 5) & 1 ) == 1){
 		return true;
 	}else{
 		return false;
@@ -92,12 +92,12 @@ bool cpu::f_h(){
 
 //Set C flag
 void cpu::set_f_c(bool c){
-	f = (f & !(1 << 4)) | c << 4;
+	f = (f & ~(1 << 4)) | c << 4;
 }
 
 //Return C flag
 bool cpu::f_c(){
-	if((f >> 4) & 1 == 1){
+	if(((f >> 4) & 1 ) == 1){
 		return true;
 	}else{
 		return false;
@@ -554,7 +554,7 @@ void cpu::xor_d8(){
 void cpu::cp_r8(short reg){
 	printf("CP %s", reg_to_string(reg).c_str());
 
-	int a = a;
+	int a = this->a;
 	int val = read_r8(reg);
 
 	set_f_z(a == val);
@@ -2020,5 +2020,6 @@ void cpu::dump(){
 }
 
 int main(){
-	
+	cpu cpu;
+	cpu.af();
 }

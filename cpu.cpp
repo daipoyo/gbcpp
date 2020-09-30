@@ -206,7 +206,7 @@ void cpu::write_r8(int idx, int val){
 //Read 8-bit operand
 int cpu::read_r8(int idx){
 
-	int operand;
+	int operand = 0; //ayashii
 
 	switch(idx){
 		case 0:
@@ -265,7 +265,7 @@ void cpu::write_r16(int idx, int val){
 
 //Read 16-bit operand
 int cpu::read_r16(int idx){
-	int operand;
+	int operand = 0; //ayashii
 
 	switch(idx){
 		case 0:
@@ -305,19 +305,24 @@ int cpu::read_d16(){
 
 //Checks branch condition
 bool cpu::cc(int idx){
-	bool result;
+	bool result = false; //ayashii
 
 	switch(idx){
 		case 0:
 			result = !f_z();
+			break;
 		case 1:
 			result = f_z();
+			break;
 		case 2:
 			result = !f_c();
+			break;
 		case 3:
 			result = f_c();
+			break;
 		default:
 			printf("Invalid Operand index %d", idx);
+			break;
 	}
 	return result;
 }
@@ -397,7 +402,6 @@ void cpu::ld_r16_d16(int reg){
 //LD (d16), SP
 void cpu::ld_ind_d16_sp(){
 	int addr = read_d16();
-	int sp = sp;
 
 	printf("LD %d SP", addr);
 
@@ -559,7 +563,7 @@ void cpu::cp_r8(short reg){
 
 	set_f_z(a == val);
 	set_f_n(true);
-	set_f_h(a & 0x0F < val & 0x0F);
+	set_f_h((a & 0x0F) < (val & 0x0F));
 	set_f_c(a < val);	
 }
 
@@ -570,7 +574,7 @@ void cpu::cp_d8(){
 
     set_f_z(a == imm);
     set_f_n(true);
-    set_f_h(a & 0x0f < imm & 0x0f);
+    set_f_h((a & 0x0f) < (imm & 0x0f));
     set_f_c(a < imm);
 }
 
@@ -585,7 +589,7 @@ void cpu::daa(){
 			aa = aa + 0x60;
 			set_f_c(true);
 		}
-		if(f_h() || aa & 0x0F > 0x09){
+		if(f_h() || (aa & 0x0F) > 0x09){
 			aa = aa + 0x06;
 		}
 	}else{
@@ -915,16 +919,16 @@ void cpu::set(unsigned short pos, unsigned short reg){
 void cpu::res(unsigned short pos, unsigned short reg){
     printf("RES %d, %s", pos, reg_to_string(reg).c_str());
 
+    unsigned short temp = 1;
     unsigned short val = read_r8(reg);
-    write_r8(reg, val & !(1 << pos));
+    write_r8(reg, val & !(temp = temp << pos));
 }
-
 
 void cpu::_rl(unsigned short reg){
     unsigned short orig = read_r8(reg);
     unsigned short res;
 
-    if((orig << 1) || (f_c())){
+    if((orig = orig << 1) || (f_c())){
         res = 1;
     }else{
         res = 0;
@@ -935,7 +939,7 @@ void cpu::_rl(unsigned short reg){
     set_f_z(res == 0);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig >> 7 & 1 == 1);
+    set_f_c((orig = orig >> 7 & 1) == 1);
 }
 
 //Rotate left through carry
@@ -953,7 +957,7 @@ void cpu::_rlc(unsigned short reg){
     set_f_z(res);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig >> 7 & 1 == 1);
+    set_f_c((orig = orig >> 7 & 1) == 1);
 
 }
 
@@ -980,7 +984,7 @@ void cpu::_rr(unsigned short reg){
     set_f_z(res == 0);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig & 1 == 1);
+    set_f_c((orig = orig & 1) == 1);
 }
 
 //Rotate right through carry
@@ -998,7 +1002,7 @@ void cpu::_rrc(unsigned short reg){
     set_f_z(res == 0);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig & 1 == 1);
+    set_f_c((orig & 1) == 1);
 }
 
 //Rotate right
@@ -1019,7 +1023,7 @@ void cpu::sla(unsigned short reg){
     set_f_z(res == 0);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig & 0x80 > 0);
+    set_f_c((orig & 0x80) > 0);
 }
 
 //Shift right into carry
@@ -1033,7 +1037,7 @@ void cpu::sra(unsigned short reg){
     set_f_z(res == 0);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig & 1 > 0);
+    set_f_c((orig & 1) > 0);
 }
 
 //Swap low/hi-nibble *nibble = 4bit
@@ -1061,7 +1065,7 @@ void cpu::srl(unsigned short reg){
     set_f_z(res == 0);
     set_f_n(false);
     set_f_h(false);
-    set_f_c(orig & 1 == 1);
+    set_f_c((orig & 1) == 1);
 }
 
 void cpu::_jp(unsigned int addr){
@@ -1180,7 +1184,7 @@ void cpu::inc_r8(unsigned short reg){
     write_r8(reg, res);
 
     set_f_z(res == 0);
-    set_f_h(orig & 0x0f == 0x0f);
+    set_f_h((orig & 0x0f) == 0x0f);
     set_f_n(false);
 }
 
@@ -1198,7 +1202,7 @@ void cpu::dec_r8(unsigned short reg){
     }
 
     set_f_z(res == 0);
-    set_f_h(orig & 0x0f == 0x00);
+    set_f_h((orig & 0x0f) == 0x00);
     set_f_n(true);
 }
 
@@ -1494,7 +1498,7 @@ void cpu::rra(){
 }
 
 void cpu::inc_r16(unsigned short reg){
-	printf("INC %s", reg16_to_string(reg));
+	printf("INC %s", reg16_to_string(reg).c_str());
 
 	unsigned int val = read_r16(reg);
 
@@ -1510,7 +1514,7 @@ void cpu::inc_r16(unsigned short reg){
 }
 
 void cpu::dec_r16(unsigned short reg){
-	printf("DEC %s", reg16_to_string(reg));
+	printf("DEC %s", reg16_to_string(reg).c_str());
 
 	unsigned int val = read_r16(reg);
 
@@ -1568,30 +1572,43 @@ void cpu::prefix(){
 	unsigned int pos = opcode >> 3 & 0x7;
 	unsigned int reg = opcode & 0x7;
 
-	if(0x00 <= opcode <= 0x07){
-		rlc(reg);
-	}else if(0x08 <= opcode <= 0x0f){
-		rrc(reg);
-	}else if(0x10 <= opcode <= 0x17){
-		rl(reg);
-	}else if(0x18 <= opcode <= 0x1f){
-		rr(reg);
-	}else if(0x20 <= opcode <= 0x27){
-		sla(reg);
-	}else if(0x28 <= opcode <= 0x2f){
-		sra(reg);
-	}else if(0x30 <= opcode <= 0x37){
-		swap(reg);
-	}else if(0x38 <= opcode <= 0x3f){
-		srl(reg);
-	}else if(0x40 <= opcode <= 0x7f){
-		bit(pos, reg);
-	}else if(0x80 <= opcode <= 0xbf){
-		res(pos, reg);
-	}else if(0xc0 <= opcode <= 0xff){
-		set(pos, reg);
-	}else{
-		printf("Unimplemented opcode 0xcb 0x%x", opcode);
+	switch(opcode){
+		case 0x00 ... 0x07:
+			rlc(reg);
+			break;
+		case 0x08 ... 0x0f:
+			rrc(reg);
+			break;
+		case 0x10 ... 0x17:
+			rl(reg);
+			break;
+		case 0x18 ... 0x1f:
+			rr(reg);
+			break;
+		case 0x20 ... 0x27:
+			sla(reg);
+			break;
+		case 0x28 ... 0x2f:
+			sra(reg);
+			break;
+		case 0x30 ... 0x37:
+			swap(reg);
+			break;
+		case 0x38 ... 0x3f:
+			srl(reg);
+			break;
+		case 0x40 ... 0x7f:
+			bit(pos, reg);
+			break;
+		case 0x80 ... 0xbf:
+			res(pos, reg);
+			break;
+		case 0xc0 ... 0xff:
+			set(pos, reg);
+			break;
+		default:
+			printf("Unimplemented opcode 0xcb 0x%x", opcode);
+			break;
 	}
 }
 
@@ -1635,8 +1652,8 @@ unsigned short cpu::step(){
 void cpu::check_irqs(){
 	//Bit 0 has the highest priority
 	for(int i = 0; i < 6; i = i + 1){
-		bool irq = mmu.int_flag & (1 << i) > 0;
-		bool ie = mmu.int_enable & (1 << i) > 0;
+		bool irq = (mmu.int_flag & (1 << i)) > 0;
+		bool ie = (mmu.int_enable & (1 << i)) > 0;
 
 		//If interrupt is requested and enabled
 		if(irq && ie){
@@ -1648,13 +1665,15 @@ void cpu::check_irqs(){
 
 //Calls requested interrupt service routine.
 void cpu::call_isr(short id){
+	
+	unsigned short temp = 1;
 	//Reset corresponding bit in IF
-	mmu.int_flag &= !(1 << id);
+	mmu.int_flag &= !(temp = temp << id);
 	//Clear IME(disable any further interrupts)
 	ime = false;
 	halted = false;
 
-	unsigned int isr;
+	unsigned int isr = 0;
 
 	switch(id){
 		case 1:

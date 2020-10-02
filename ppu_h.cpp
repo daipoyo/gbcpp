@@ -19,7 +19,7 @@ public:
 
 
 class render{
-public:
+private:
 	int map_color(int color_no, int palette);
 	int get_color_no(int tile0, int tile1, int bitpos);
     int VRAM[0x2000];

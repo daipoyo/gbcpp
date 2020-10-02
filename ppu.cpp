@@ -1,4 +1,4 @@
-#pragma once
+#pragma onc
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -43,7 +43,11 @@ std::tuple<int, int> render::fetch_tile(int tile_no, int offset_y, bool tile_dat
 		tile_data_addr = tile_no << 4;
 	}else{
 		// Use tile set #2 (0x0800-0x0fff) and #3 (0x1000-0x17ff)
-		tile_data_addr = 0x1000 + tile_no << 4;
+		if(0x1000 + (tile_no << 4) > 0xffff){
+			tile_data_addr = 0x1000 + (tile_no << 4) - 0xffff;
+		}else{
+			tile_data_addr = 0x1000 + (tile_no << 4);
+		}
 		// printf("%x",tile_data_addr);
 	}
 	int row_addr = tile_data_addr + (offset_y << 1);
@@ -69,7 +73,7 @@ std::tuple<int, int> render::fetch_bg_tile(int tile_x, int tile_y, int offset_y)
 	int lcdc = a[0xff40];
 	int tile_map_base;
 
-	if(lcdc & 0x40 > 0){
+	if((lcdc & 0x40) > 0){
 		tile_map_base = 0x1c00;
 	}else{
 		tile_map_base = 0x1800;
@@ -84,7 +88,7 @@ std::tuple<int, int> render::fetch_window_tile(int tile_x, int tile_y, int offse
 	int lcdc = a[0xff40];
 	int tile_map_base;
 
-	if(lcdc & 0x8 > 0){
+	if((lcdc & 0x8) > 0){
 		tile_map_base = 0x1c00;
 	}else{
 		tile_map_base = 0x1800;
@@ -125,10 +129,20 @@ void render::render_bg(){
 	//read_rom rom;
 
 	int tile_x = scx >> 3;
-	int tile_y = scy + ly >> 3;
+	int tile_y = 0;
+	if(scy + ly > 0xff){
+		tile_y = (scy + ly - 0xff) >> 3;
+	}else{
+		tile_y = (scy + ly) >> 3;
+	}
 
 	int offset_x = scx & 0x7;
-	int offset_y = scy + ly & 0x7;
+	int offset_y = 0;
+	if(scy + ly > 0xff){
+		offset_y = (scy + ly - 0xff) & 0x7;
+	}else{
+		offset_y = (scy + ly) & 0x7;
+	}
 
 	int tile0,tile1;
 	//std::tie(tile0, tile1) = render.fetch_bg_tile(tile_x, tile_y, offset_y);
@@ -138,7 +152,7 @@ void render::render_bg(){
 
 	for(int i = 0; i < screen_width; i++){
 		//Check window ON/OFF
-		if(lcdc & 0x20 == 1){
+		if((lcdc & 0x20) > 0){
 			if(wy <= ly && wx == i + 7){
 				tile_x = 0;
 				tile_y = (ly - wy) >> 3;
@@ -186,24 +200,24 @@ void render::render_splite(){
 	int n_splites = 0;
 	int height, palette, tile_no, offset_y, offset_x, bitpos;
 	int tile0,tile1;
-	render render;
+	//render render;
 
-	if(lcdc & 0x4 > 0){
+	if((lcdc & 0x4) > 0){
 		height = 16;
 	}else{
 		height = 8;
 	}
 
-	for(int i = 0; i < 40; i++){
+	for(int i = 0; i < 41; i++){
 		int entry_addr = i << 2;
 		int splite_y = OAM[entry_addr];
 		int splite_x = OAM[entry_addr + 1];
 		int flags = OAM[entry_addr + 3];
 
-		bool obj_prio = flags & 0x80 > 0;
-		bool flip_y = flags & 0x40 > 0;
-		bool flip_x = flags & 0x20 > 0;
-		if(flags & 0x10 > 0){
+		bool obj_prio = (flags & 0x80) > 0;
+		bool flip_y = (flags & 0x40) > 0;
+		bool flip_x = (flags & 0x20) > 0;
+		if((flags & 0x10) > 0){
 			palette = ob_palette1;
 		}else{
 			palette = ob_palette0;
@@ -224,7 +238,7 @@ void render::render_splite(){
 			continue;
 		}
 
-		if(lcdc & 0x4 > 0){
+		if((lcdc & 0x4) > 0){
 			//8x16
 			if((ly + 8 < splite_y) ^ flip_y){
 				tile_no = OAM[entry_addr + 2] & 0xfe;
@@ -243,9 +257,9 @@ void render::render_splite(){
 			offset_y = (ly + 16 - splite_y) & 0x7;
 		}
 
-		std::tie(tile0, tile1) = render.fetch_tile(tile_no, offset_y, true);
+		std::tie(tile0, tile1) = fetch_tile(tile_no, offset_y, true);
 
-		for(int offset_x = 0; offset_x < 8; offset_x++){
+		for(offset_x = 0; offset_x < 9; offset_x++){
 			if(offset_x + splite_x < 8){
 				continue;
 			}
@@ -257,14 +271,14 @@ void render::render_splite(){
 			}
 
 			if(flip_x){bitpos = offset_x;}else{bitpos = 7 - offset_x;}
-			int color_no = render.get_color_no(tile0, tile1, bitpos);
+			int color_no = get_color_no(tile0, tile1, bitpos);
 			if(color_no == 0){
 				continue;
 			}
 			if(bg_prio[x] == "Color123" && obj_prio){
 				continue;
 			}
-			int color = render.map_color(color_no, palette);
+			int color = map_color(color_no, palette);
 
 			scanline[x] = color;
 		}
@@ -274,10 +288,10 @@ void render::render_splite(){
 }
 
 void render::render_scanline(){
-	if(lcdc & 0x1 > 0){
+	if((lcdc & 0x1) > 0){
 		render_bg();
 	}
-	if(lcdc & 0x2 > 0){
+	if((lcdc & 0x2) > 0){
 		render_splite();
 	}
 
@@ -294,7 +308,7 @@ std::array<int, screen_width * screen_height> render::exe_frame_buffer(){
 void render::check_lyc_interrupt(){
 	if(ly == lyc){
 		stat |= 0x4;
-		if(stat & 0x40 > 0){
+		if((stat & 0x40) > 0){
 			irq_lcdc = true;
 		}
 	}else{
@@ -305,17 +319,17 @@ void render::check_lyc_interrupt(){
 void render::check_lcdmode_interrupt(){
 	switch(stat & 0x3){
 		case 0: //H-Blank interrupt
-			if(stat & 0x8 > 0){
+			if((stat & 0x8) > 0){
 				irq_lcdc = true;
 			}
 			break;
 		case 1: //V-Blank interrupt
-			if(stat & 0x10 > 0){
+			if((stat & 0x10) > 0){
 				irq_lcdc = true;
 			}
 			break;
 		case 2: //OAM Search interrupt
-			if(stat & 0x20 > 0){
+			if((stat & 0x20) > 0){
 				irq_lcdc = true;
 			}
 			break;

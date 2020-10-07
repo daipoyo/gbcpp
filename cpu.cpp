@@ -1,6 +1,6 @@
 #include <string>
 #include "cpu_h.cpp"
-#include "mmu.cpp"
+#include "mmu_h.cpp"
 
 mmu mmu;
 
@@ -1727,6 +1727,7 @@ void cpu::fetch_and_exec(){
 		//LD SP, HL
 		case 0xf9:
 			ld_sp_hl();
+			break;
 		//LD A, r16
 		case 0x02:
 			ld_ind_bc_a();

@@ -1,3 +1,5 @@
+#include "io_device.cpp"
+
 class timer : public io_device{
 public:
 	//Timer counter

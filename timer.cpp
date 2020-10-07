@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 #include <windows.h>
-#include "io_device.cpp"
 #include "timer_h.cpp"
 
 void timer::write(unsigned int addr, unsigned short val){
@@ -30,7 +29,7 @@ void timer::write(unsigned int addr, unsigned short val){
 
 unsigned int timer::read(unsigned int addr, unsigned short val){
 	
-	unsigned int temp;
+	unsigned int temp = 0;
 
 	switch(addr){
 		//DIV
@@ -51,6 +50,7 @@ unsigned int timer::read(unsigned int addr, unsigned short val){
 			break;
 		default:
 			printf("Unexpexted address: 0x%4x\n", addr);
+			break;
 	}
 	return temp;
 }
@@ -67,9 +67,9 @@ void timer::update(unsigned int tick){
 		counter = counter + tick;
 	}
 
-	unsigned short divider;
+	unsigned short divider = 0;
 
-	if(this->tac & 4 > 0){
+	if((this->tac & 4) > 0){
 		switch(this->tac & 3){
 			case 0:
 				divider = 10;
@@ -93,10 +93,10 @@ void timer::update(unsigned int tick){
 	unsigned int diff;
 
 	//wrapping_sub
-	if((diff - y) < 0){
-		diff = (diff - y + 0xffff) & mask;
+	if((x - y) < 0){
+		diff = (x - y + 0xffff) & mask;
 	}else{
-		diff = (diff - y) & mask;
+		diff = (x - y) & mask;
 	}
 
 	bool overflow;
@@ -137,11 +137,11 @@ void timer::update(unsigned int tick){
 // }
 
 
-int main(){
+/*int main(){
 	timer call_timer;
 	printf("%d\n", call_timer.counter);
 	call_timer.write(0xff04, 100);
 	printf("%d\n", call_timer.counter);
 
 	//std::cout << std::string("Hello World").c_str() << std::endl;
-}
+}*/

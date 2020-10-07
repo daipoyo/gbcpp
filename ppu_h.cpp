@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
+#include <array>
 #include <vector>
-
+#include "io_device.cpp"
 
 std::vector<int> a;
 const int screen_width = 160;
@@ -18,10 +19,17 @@ public:
 };
 
 
-class render{
+class render : public io_device{
+public:
+    void write(unsigned int addr, unsigned short val) override;
+    unsigned int read(unsigned int addr, unsigned short val) override;
+    void update(unsigned int tick) override;
+    bool irq_vblank;
+    bool irq_lcdc;
+
 private:
-	int map_color(int color_no, int palette);
-	int get_color_no(int tile0, int tile1, int bitpos);
+    int map_color(int color_no, int palette);
+    int get_color_no(int tile0, int tile1, int bitpos);
     int VRAM[0x2000];
     int OAM[0xa0];
     int lcdc;
@@ -36,8 +44,6 @@ private:
     int ob_palette1;
     int wy;
     int wx;
-    bool irq_vblank;
-    bool irq_lcdc;
     int counter;
     std::array<int,screen_width * screen_height> frame_buffer;
     std::array<int,screen_width> scanline;
@@ -55,8 +61,8 @@ private:
     std::array<int, screen_width * screen_height> exe_frame_buffer();
     void check_lyc_interrupt();
     void check_lcdmode_interrupt();
-    void write(int addr, int val);
-    int read(int addr);
-    void update(int tick);
+    //void write(int addr, int val);
+    //int read(int addr);
+    //void update(int tick);
 
 };

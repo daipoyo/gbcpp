@@ -1,4 +1,3 @@
-#pragma onc
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -19,7 +18,6 @@ void read_rom::fetch(std::string filename){
     	std::string buf;
     	std::string buf_line;
 		// std::vector<int> a;
-    	int n = 0;
 		while (std::getline(ifs, buf)){
 			// std::cout << std::hex << std::showbase << buf << std::endl;
 			std::stringstream ss{buf};
@@ -65,7 +63,7 @@ std::tuple<int, int> render::fetch_bg_window_tile(int tile_x, int tile_y, int of
 
 	//render render;
 	//render.fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
-	std::tuple<int, int> tuple = fetch_tile(tile_no, offset_y, lcdc & 0x10 > 0);
+	std::tuple<int, int> tuple = fetch_tile(tile_no, offset_y, (lcdc & 0x10) > 0);
 	return tuple;
 }
 
@@ -338,8 +336,37 @@ void render::check_lcdmode_interrupt(){
 	}
 }
 
-void render::write(int addr, int val){
-	if(0x8000 <= addr <= 0x9FFF){
+void render::write(unsigned int addr, unsigned short val){
+	switch(addr){
+		case 0x8000 ... 0x9FFF:
+			if((stat & 0x3) != 3){
+				VRAM[(addr & 0x1fff)] = val;
+			}
+			break;
+		case 0xFE00 ... 0xFE9F:
+			if((stat & 0x3) == 0 || (stat & 0x3) == 1){
+				OAM[(addr & 0x00ff)] = val;
+			}
+			break;
+		case 0xFF40:
+			if((lcdc & 0x80) != (val & 0x80)){
+				ly = 0;
+				counter = 0;
+
+				int mode;
+				if((val & 0x80) > 0){
+					mode = 2;	
+				}else{
+					mode = 0;
+				}
+				stat = (stat & 0xf8) | mode;
+				check_lcdmode_interrupt();
+			}
+			lcdc = val;
+			break; 
+	}
+
+	/*if(0x8000 <= addr <= 0x9FFF){
 		if(stat & 0x3 != 3){
 			VRAM[(addr & 0x1fff)] = val;
 		}
@@ -362,90 +389,93 @@ void render::write(int addr, int val){
 			check_lcdmode_interrupt();
 		}
 		lcdc = val;
-	}
+	}*/
 }
 
-int render::read(int addr){
-	int temp;
+unsigned int render::read(unsigned int addr, unsigned short val){
+	int temp = 0;
 
-	if(0x8000 <= addr <= 0x9FFF){
-		if(stat & 0x3 != 3){
-			VRAM[addr & 0x1fff];
-		}else{
-			temp = 0xff;
-		}
-	}else if(0xfe00 <= addr <= 0xfe9f){
-		if(stat & 0x3 == 0 || stat & 0x3 == 1){
-			OAM[(addr & 0x00ff)];
-		}else{
-			temp =  0xff;
-		}
-	}else if(0xff40 <= addr <= 0xff4b){
-		switch(addr & 0x1){
-			case 0:
-				temp =  lcdc;
-				break;
-			case 1:
-				temp =  stat;
-				break;
-			case 2:
-				temp =  scy;
-				break;
-			case 3:
-				temp =  scx;
-				break;
-			case 4:
-				temp =  ly;
-				break;
-			case 5:
-				temp =  lyc;
-				break;
-			case 6:
-				temp =  dma;
-				break;
-			case 7:
-				temp =  bg_palette;
-				break;
-			case 8:
-				temp =  ob_palette0;
-				break;
-			case 9:
-				temp =  ob_palette1;
-				break;
-			case 0xa:
-				temp =  wy;
-				break;
-			case 0xb:
-				temp =  wx;
-				break;
-		}
+	switch(addr){
+		case 0x8000 ... 0x9FFF:
+			if((stat & 0x3) != 3){
+				temp = VRAM[addr & 0x1fff];
+			}else{
+				temp = 0xff;
+			}
+			break;
+		case 0xFE00 ... 0xFE9F:
+			if((stat & 0x3) == 0 || (stat & 0x3) == 1){
+				temp = OAM[(addr & 0x00ff)];
+			}else{
+				temp =  0xff;
+			}
+			break;
+		case 0xFF40 ... 0xFF4B:
+			switch(addr & 0x1){
+				case 0:
+					temp =  lcdc;
+					break;
+				case 1:
+					temp =  stat;
+					break;
+				case 2:
+					temp =  scy;
+					break;
+				case 3:
+					temp =  scx;
+					break;
+				case 4:
+					temp =  ly;
+					break;
+				case 5:
+					temp =  lyc;
+					break;
+				case 6:
+					temp =  dma;
+					break;
+				case 7:
+					temp =  bg_palette;
+					break;
+				case 8:
+					temp =  ob_palette0;
+					break;
+				case 9:
+					temp =  ob_palette1;
+					break;
+				case 0xA:
+					temp =  wy;
+					break;
+				case 0xB:
+					temp =  wx;
+					break;
+			}
 	}
 	return temp;
 }
 
-void render::update(int tick){
-	if(lcdc & 0x80 == 0){
+void render::update(unsigned int tick){
+	if((lcdc & 0x80) == 0){
 		return;
 	}
 
 	counter += tick;
 
 	//OAM Search (80 clocks)
-	if(stat & 0x3 == 2){
+	if((stat & 0x3) == 2){
 		if(counter >= 80){
 			counter -= 80;
 			stat = (stat & 0xf8) | 3;
 			render_scanline();
 		}
 	//Pixel Transfer (172 clocks)
-	}else if(stat & 0x3 == 3){
+	}else if((stat & 0x3) == 3){
 		if(counter >= 172){
 			counter -= 172;
 			stat = (stat & 0xf8);
 			check_lcdmode_interrupt();
 		}
 	// H-Blank (204 clocks)
-	}else if(stat & 0x3 == 0){
+	}else if((stat & 0x3) == 0){
 		if(counter >= 204){
 			counter -= 204;
 			ly += 1;
@@ -474,17 +504,17 @@ void render::update(int tick){
 }
 
 
-//int main(){
-//	read_rom rom;
-//	render render;
-//	std::string filename = "test";
-//	rom.fetch(filename);
-//	int a, b;
-//	//std::tie(a,b) = render.fetch_tile(80, 0, false);
-//	//std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
-//	//std::cout << a << ", " << b << std::endl;
-//	int c = 2;
-//	if(3 <= c){
-//		printf("AAA");
-//	}
-//}
+int main(){
+	read_rom rom;
+	render render;
+	std::string filename = "test";
+	rom.fetch(filename);
+	int a, b;
+	//std::tie(a,b) = render.fetch_tile(80, 0, false);
+	//std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
+	//std::cout << a << ", " << b << std::endl;
+	int c = 2;
+	if(3 <= c){
+		printf("AAA");
+	}
+}

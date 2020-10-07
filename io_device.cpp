@@ -1,4 +1,4 @@
-//template<class T, class U>
+#pragma once
 class io_device{
 //private:
 public:

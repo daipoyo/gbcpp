@@ -20,17 +20,7 @@ void read_rom::fetch(std::string filename){
     	std::string buf;
     	std::string buf_line;
 		std::vector<int> a;
-    	int n = 0;
-    	/*while (std::getline(ifs, buf, ' ')){
 
-			std::cout << std::hex << std::showbase << buf << std::endl;
-			// std::cout << std::hex << std::showbase << buf << std::endl;
-    		int buf_num = std::stoi(buf, nullptr, 16);
-    		int up = buf_num >> 8 & 0xff;
-			a.push_back(up);
-    		int down = buf_num & 0xff;
-			a.push_back(down);
-		}*/
 		while (std::getline(ifs, buf)){
 
 			std::cout << std::hex << std::showbase << buf << std::endl;
@@ -44,24 +34,13 @@ void read_rom::fetch(std::string filename){
     		}
 		}
 		std::cout << std::hex << std::showbase << a[16] << std::endl;
-		// printf("num : %d", a[100]);
-
-    	/*while (ifs >> std::hex >> n)
-		a.push_back(n);
-		std::cout << std::hex << std::showbase << a[100] << std::endl;*/
-		// for debug
-		/*for (int i = 0; i < a.size(); ++i)
-			std::cout << "a[" << std::dec << i << "] == "
-				<< std::hex << std::showbase << a[i] << std::endl;*/
     }
-
-
 }
 
 
 /*int main()
 {
-    std::ifstream ifs("test");
+    std::ifstream ifs("../test");
     if (!ifs) {
         std::cerr << "error" << std::endl;
         std::exit(EXIT_FAILURE);
@@ -75,6 +54,6 @@ void read_rom::fetch(std::string filename){
 
 int main(){
 	read_rom rom;
-	std::string filename = "test";
+	std::string filename = "../instr_timing.gb";
 	rom.fetch(filename);
 }

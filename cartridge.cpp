@@ -26,7 +26,7 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
 				rom.push_back(down);
     		}
 		}
-		std::cout << std::hex << std::showbase << rom[16] << std::endl;
+		//std::cout << std::hex << std::showbase << rom[16] << std::endl;
     }
 
     unsigned short rom_index = rom[0x0148];
@@ -243,7 +243,7 @@ unsigned short cartridge::ram_bank_no(){
 
 void cartridge::read_save_file(std::string fname){
     printf("Reading save file from: %s\n", fname.c_str());
-    std::ifstream ifs(fname, std::hex);
+    std::ifstream ifs(fname);
 
     if(ifs){
         K_ridge.ram.clear();
@@ -306,6 +306,6 @@ void cartridge::write_save_file(std::string fname){
 int main(){
     cartridge cartridge;
 
-    cartridge.read_save_file("test");
-    cartridge.write_save_file("test2");
+    cartridge.Nnew("test");
+    
 }

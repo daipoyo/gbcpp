@@ -1,5 +1,8 @@
 #include "io_device.cpp"
 #include "cartridge_h.cpp"
+#include <iomanip>
+#include <vector>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -8,28 +11,34 @@
 struct cartridge::Kartridge cartridge::Nnew(std::string fname){
 
 	std::ifstream ifs(fname);
+    unsigned int size = std::filesystem::file_size(fname);    
+    std::vector<char> rom_data(size);
+
 
 	if (!ifs){
         std::cout << "Error! File can not be opened" << std::endl;
     }else{
-    	std::string buf;
-    	std::string buf_line;
-		// std::vector<int> a;
-		while (std::getline(ifs, buf)){
-			// std::cout << std::hex << std::showbase << buf << std::endl;
-			std::stringstream ss{buf};
-    		while (std::getline(ss, buf_line, ' ')){
-	    		int buf_num = std::stoi(buf_line, nullptr, 16);
-	    		unsigned short up = buf_num >> 8 & 0xff;
-				rom.push_back(up);
-	    		unsigned short down = buf_num & 0xff;
-				rom.push_back(down);
-    		}
-		}
-		//std::cout << std::hex << std::showbase << rom[16] << std::endl;
+        //unsigned int size = std::filesystem::file_size(fname);    
+        std::ifstream ifs(fname, std::ios::binary);
+    
+        //std::vector<char> rom(size);
+        if (!ifs.read(&rom_data[0], size));
+        
+        std::cout << std::hex << std::setfill('0');
+        unsigned int i = 0;
+        while (i < size) {
+            //rom[i] = (rom[i] & 0xff);
+            //std::cout << (rom[i] & 0xff);
+            i++;
+        }
+
     }
 
-    unsigned short rom_index = rom[0x0148];
+    std::cout << (rom_data[0x148] & 0xff) << std::endl;
+
+    unsigned int rom_index = (rom_data[0x0148] & 0xff);
+
+    std::cout << rom_index;
     unsigned int rom_size = 0;
     switch(rom_index){
     	case 0:
@@ -38,11 +47,15 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
     	case 1 ... 5:
     		rom_size = 32 * 1024 << rom_index;
     		break;
+        default:
+            break;
     }
 
-    K_ridge.num_rom_banks = 2 << rom[0x0148];
+    std::cout << "test" << std::endl;
 
-    unsigned short ram_index = rom[0x0149];
+    K_ridge.num_rom_banks = 2 << rom_data[0x0148];
+
+    unsigned short ram_index = rom_data[0x0149];
     unsigned int ram_size = 0;
     switch(ram_index){
     	case 0:
@@ -68,7 +81,10 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
     		break;
     }
 
-    K_ridge.mbc_type = rom[0x0147];
+    std::cout << "test" << std::endl;
+    
+
+    K_ridge.mbc_type = rom_data[0x0147];
 
     std::string mbc_name;
 
@@ -162,18 +178,21 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
             break;
     }
 
+    std::cout << "test" << std::endl;
+    
+
     unsigned short chksum = 0;
 
-    for(int i = 0x0134; i < 0x014E; i = i + 1){
-        if((chksum - rom[i]) < 0){
-            chksum = chksum - rom[i] + 0xFF;
+    for(unsigned int i = 0x0134; i < 0x014E; i = i + 1){
+        if((chksum - rom_data[i]) < 0){
+            chksum = chksum - rom_data[i] + 0xFF;
             if((chksum - 1) < 0){
                 chksum = chksum - 1 + 0xFF;
             }else{
                 chksum = chksum - 1;
             }
         }else{
-            chksum = chksum - rom[i];
+            chksum = chksum - rom_data[i];
             if((chksum - 1) < 0){
                 chksum = chksum - 1 + 0xFF;
             }else{
@@ -182,17 +201,20 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
         }
     }
 
-    if(rom_size != rom.size()){
+    std::cout << "test2" << std::endl;
+    
+    if(rom_size != rom_data.size()){
         printf("ROM file invalid!");
     }
 
-    if(chksum != rom[0x014D]){
+    if(chksum != rom_data[0x014D]){
         printf("ROM header checksum is incorrect");
     }
 
     printf("ROM size %dKB", rom_size/1024);
     printf("RAM size %dKB", ram_size/1024);
     printf("MBC type %s", mbc_name.c_str());
+    std::cout << "MBC type = " << std::endl;    
 
     std::vector<unsigned int> vec(ram_size, 0);
     //input Cartridge info 
@@ -305,7 +327,10 @@ void cartridge::write_save_file(std::string fname){
 
 int main(){
     cartridge cartridge;
-
+    //struct cartridge::Kartridge hoge;    
     cartridge.Nnew("test");
+
+    //printf("mbc_type : %d", hoge.mbc_type);
+    return 0;
     
 }

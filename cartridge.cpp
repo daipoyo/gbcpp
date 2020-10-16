@@ -27,18 +27,14 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
         std::cout << std::hex << std::setfill('0');
         unsigned int i = 0;
         while (i < size) {
-            //rom[i] = (rom[i] & 0xff);
-            //std::cout << (rom[i] & 0xff);
+            //rom[i] = (rom[i] & 0xFF);
+            //std::cout << (rom[i] & 0xFF);
             i++;
         }
-
     }
 
-    std::cout << (rom_data[0x148] & 0xff) << std::endl;
+    unsigned int rom_index = (rom_data[0x0148] & 0xFF);
 
-    unsigned int rom_index = (rom_data[0x0148] & 0xff);
-
-    std::cout << rom_index;
     unsigned int rom_size = 0;
     switch(rom_index){
     	case 0:
@@ -49,9 +45,7 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
     		break;
         default:
             break;
-    }
-
-    std::cout << "test" << std::endl;
+    }    
 
     K_ridge.num_rom_banks = 2 << rom_data[0x0148];
 
@@ -77,14 +71,11 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
     		ram_size = 64 * 1024;
     		break;
     	case 6:
-    		printf("RAM size invalid");
+    		printf("RAM size invalid\n");
     		break;
-    }
+    }    
 
-    std::cout << "test" << std::endl;
-    
-
-    K_ridge.mbc_type = rom_data[0x0147];
+    K_ridge.mbc_type = rom_data[0x0147] & 0xFF;
 
     std::string mbc_name;
 
@@ -170,51 +161,57 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
         case 0xfe:
             mbc_name = "HuC3";
             break;
-        case 0xff:
+        case 0xFF:
             mbc_name = "HuC1+RAM+BATTERY";
             break;
         default:
-            printf("Unknown cartridge type");
+            printf("Unknown cartridge type\n");
             break;
-    }
-
-    std::cout << "test" << std::endl;
-    
+    }    
 
     unsigned short chksum = 0;
+    stzd::cout << chksum << std::endl;
 
-    for(unsigned int i = 0x0134; i < 0x014E; i = i + 1){
-        if((chksum - rom_data[i]) < 0){
-            chksum = chksum - rom_data[i] + 0xFF;
-            if((chksum - 1) < 0){
-                chksum = chksum - 1 + 0xFF;
-            }else{
-                chksum = chksum - 1;
-            }
-        }else{
-            chksum = chksum - rom_data[i];
-            if((chksum - 1) < 0){
-                chksum = chksum - 1 + 0xFF;
-            }else{
-                chksum = chksum - 1;
-            }
-        }
+    // for(unsigned int i = 0x0134; i < 0x014D; i = i + 1){
+    //     std::cout << "rom_data[i] = "<< (rom_data[i] & 0xFF) << std::endl; //debug
+    //     //std::cout << "chksum      = "<< chksum << std::endl; //debug
+    //     if((chksum - (rom_data[i] & 0xFF)) < 0){
+    //         chksum = chksum - (rom_data[i] & 0xFF) + 0xFF;
+    //         if((chksum - 1) < 0){
+    //             chksum = chksum - 1 + 0xFF;
+    //         }else{
+    //             chksum = chksum - 1;
+    //         }
+    //     }else{
+    //         chksum = chksum - (rom_data[i] & 0xFF);
+    //         if((chksum - 1) < 0){
+    //             chksum = chksum - 1 + 0xFF;
+    //         }else{
+    //             chksum = chksum - 1;
+    //         }
+    //     }
+    // }
+
+    for(unsigned int i = 0x0134; i < 0x014D; i = i + 1){
+        //std::cout << "rom_data[i] = "<< (rom_data[i] & 0xFF) << std::endl; //debug
+        //std::cout << "chksum      = "<< chksum << std::endl; //debug
+        chksum = chksum - (rom_data[i] & 0xFF) - 1;
     }
 
-    std::cout << "test2" << std::endl;
-    
+    //unsigned short str = rom_data[0x014D] & 0xFF; //debug    
+    //std::cout << str << std::endl; //debug
+
     if(rom_size != rom_data.size()){
         printf("ROM file invalid!");
     }
 
-    if(chksum != rom_data[0x014D]){
-        printf("ROM header checksum is incorrect");
+    if((chksum & 0xFF) != (rom_data[0x014D] & 0xFF)){
+        printf("ROM header checksum is incorrect\n");
     }
 
-    printf("ROM size %dKB", rom_size/1024);
-    printf("RAM size %dKB", ram_size/1024);
-    printf("MBC type %s", mbc_name.c_str());
-    std::cout << "MBC type = " << std::endl;    
+    printf("ROM size %dKB\n", rom_size/1024);
+    printf("RAM size %dKB\n", ram_size/1024);
+    printf("MBC type %s\n", mbc_name.c_str());
 
     std::vector<unsigned int> vec(ram_size, 0);
     //input Cartridge info 
@@ -281,11 +278,11 @@ void cartridge::read_save_file(std::string fname){
                 //std::cout << std::hex << buf_line << std::endl;
                 try{
                     int buf_num = std::stoi(buf_line, nullptr, 16);
-                    unsigned short up = buf_num >> 8 & 0xff;
+                    unsigned short up = buf_num >> 8 & 0xFF;
                     K_ridge.ram.push_back(up);
-                    unsigned short down = buf_num & 0xff;
+                    unsigned short down = buf_num & 0xFF;
                     K_ridge.ram.push_back(down);
-                    printf("OK");
+                    printf("OK\n");
                 }
                 catch(const std::invalid_argument& e){
                     std::cout << "invalid argument" << std::endl;
@@ -328,7 +325,7 @@ void cartridge::write_save_file(std::string fname){
 int main(){
     cartridge cartridge;
     //struct cartridge::Kartridge hoge;    
-    cartridge.Nnew("test");
+    cartridge.Nnew("instr_timing.gb");
 
     //printf("mbc_type : %d", hoge.mbc_type);
     return 0;

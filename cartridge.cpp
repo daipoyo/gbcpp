@@ -33,9 +33,9 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
         }
     }
 
-    unsigned int rom_index = (rom_data[0x0148] & 0xFF);
+    unsigned char rom_index = (rom_data[0x0148] & 0xFF);
 
-    unsigned int rom_size = 0;
+    unsigned short rom_size = 0;
     switch(rom_index){
     	case 0:
     		rom_size = 32 * 1024;
@@ -49,7 +49,7 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
 
     K_ridge.num_rom_banks = 2 << rom_data[0x0148];
 
-    unsigned short ram_index = rom_data[0x0149];
+    unsigned char ram_index = rom_data[0x0149];
     unsigned int ram_size = 0;
     switch(ram_index){
     	case 0:
@@ -169,8 +169,7 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
             break;
     }    
 
-    unsigned short chksum = 0;
-    stzd::cout << chksum << std::endl;
+    unsigned char chksum = 0;
 
     // for(unsigned int i = 0x0134; i < 0x014D; i = i + 1){
     //     std::cout << "rom_data[i] = "<< (rom_data[i] & 0xFF) << std::endl; //debug
@@ -195,10 +194,10 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
     for(unsigned int i = 0x0134; i < 0x014D; i = i + 1){
         //std::cout << "rom_data[i] = "<< (rom_data[i] & 0xFF) << std::endl; //debug
         //std::cout << "chksum      = "<< chksum << std::endl; //debug
-        chksum = chksum - (rom_data[i] & 0xFF) - 1;
+        chksum = chksum - rom_data[i] - 1;
     }
 
-    //unsigned short str = rom_data[0x014D] & 0xFF; //debug    
+    //unsigned char str = rom_data[0x014D] & 0xFF; //debug    
     //std::cout << str << std::endl; //debug
 
     if(rom_size != rom_data.size()){
@@ -226,8 +225,8 @@ struct cartridge::Kartridge cartridge::Nnew(std::string fname){
 }
 
 
-unsigned short cartridge::rom_bank_no(){
-    unsigned short bank_no = 0;
+unsigned char cartridge::rom_bank_no(){
+    unsigned char bank_no = 0;
 
     if(K_ridge.mode){
         bank_no = K_ridge.bank_no_lower;
@@ -249,8 +248,8 @@ unsigned short cartridge::rom_bank_no(){
     return bank_no & (K_ridge.num_rom_banks -1);
 }
 
-unsigned short cartridge::ram_bank_no(){
-    unsigned short temp = 0;
+unsigned char cartridge::ram_bank_no(){
+    unsigned char temp = 0;
 
     if(K_ridge.mode){
         temp = K_ridge.bank_no_upper;
@@ -278,9 +277,9 @@ void cartridge::read_save_file(std::string fname){
                 //std::cout << std::hex << buf_line << std::endl;
                 try{
                     int buf_num = std::stoi(buf_line, nullptr, 16);
-                    unsigned short up = buf_num >> 8 & 0xFF;
+                    unsigned char up = buf_num >> 8 & 0xFF;
                     K_ridge.ram.push_back(up);
-                    unsigned short down = buf_num & 0xFF;
+                    unsigned char down = buf_num & 0xFF;
                     K_ridge.ram.push_back(down);
                     printf("OK\n");
                 }

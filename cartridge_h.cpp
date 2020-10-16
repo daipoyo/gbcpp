@@ -24,8 +24,8 @@ public:
 
 
 private:
-	unsigned short rom_bank_no();
-	unsigned short ram_bank_no();
+	unsigned char rom_bank_no();
+	unsigned char ram_bank_no();
 
 };
 

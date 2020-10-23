@@ -1,13 +1,37 @@
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
+#include <stdio.h>
 
-int main(int argc, char* argv[]){
-	SDL_Init(SDL_INIT_EVERYTHING);
+int main(int argc, char* argv[]) {
 
-	SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
+    SDL_Window *window;                    // ポインタを宣言する
 
-	SDL_Delay(3000);
+    SDL_Init(SDL_INIT_VIDEO);              // SDL2を初期化する
 
-	SDL_Quit();
+    // 次の設定でアプリケーションウィンドウを生成する:
+    window = SDL_CreateWindow(
+        "An SDL2 window",                  // ウィンドウのタイトル
+        SDL_WINDOWPOS_UNDEFINED,           // X座標の初期値
+        SDL_WINDOWPOS_UNDEFINED,           // Y座標の初期値
+        640,                               // 幅のピクセル数
+        480,                               // 高さのピクセル数
+        SDL_WINDOW_OPENGL                  // フラグ
+    );
 
-	return;
+    // ウィンドウの生成に成功したかチェックする
+    if (window == NULL) {
+        // ここを通ったならばウィンドウを生成できなかった...
+        printf("ウィンドウを生成できなかった: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    // ウィンドウが開いた: ここでプログラムループに入る (SDL_PollEvent()を参照すること)
+
+    SDL_Delay(3000);  // 例として3000ミリ秒間停止する
+
+    // ウィンドウを閉じて破棄する
+    SDL_DestroyWindow(window);
+
+    // 終了処理
+    SDL_Quit();
+    return 0;
 }

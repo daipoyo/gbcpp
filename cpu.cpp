@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include "cpu_h.cpp"
 #include "mmu_h.cpp"
@@ -357,7 +358,7 @@ std::string cpu::cc_to_string(int idx){
 
 
 //Write 8-bit value to memory
-void cpu::write_mem8(int addr, int val){
+void cpu::write_mem8(unsigned int addr, unsigned short val){
 	mmu.write(addr, val);
 
 	tick = tick + 4;
@@ -365,7 +366,7 @@ void cpu::write_mem8(int addr, int val){
 
 //read 8-bit value from memory
 int cpu::read_mem8(int addr){
-	int ret = mmu.read(addr);
+	int ret = mmu.read(addr, 0);
 
 	tick = tick + 4;
 	return ret;
@@ -2039,7 +2040,7 @@ void cpu::dump(){
 	printf("T: %d", tick);
 }
 
-int main(){
-	cpu cpu;
-	cpu.af();
-}
+// int main(){
+// 	cpu cpu;
+// 	cpu.af();
+// }

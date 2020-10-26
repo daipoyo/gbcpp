@@ -1,3 +1,4 @@
+#pragma once
 #include "joypad_h.cpp"
 #include <string>
 
@@ -95,8 +96,3 @@ unsigned int joypad::read(unsigned int addr){
 }
 
 void joypad::update(unsigned int tick){}
-
-
-int main(){
-
-}

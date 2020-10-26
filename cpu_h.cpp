@@ -48,7 +48,7 @@ private:
     int read_d16();
     bool cc(int idx);
     std::string cc_to_string(int idx);
-    void write_mem8(int addr, int val);
+    void write_mem8(unsigned int addr, unsigned short val);
     int read_mem8(int addr);
     void write_mem16(int addr, int val);
     int read_mem16(int addr);

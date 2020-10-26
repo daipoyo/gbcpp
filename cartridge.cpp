@@ -265,7 +265,7 @@ void cartridge::read_save_file(std::string fname){
 
     if(ifs){
         K_ridge.ram.clear();
-        printf("%d\n", K_ridge.ram.size());
+        printf("%lu\n", K_ridge.ram.size());
         std::string buf;
         std::string buf_line;
         // std::vector<int> a;
@@ -300,7 +300,7 @@ void cartridge::read_save_file(std::string fname){
     }
 
     //Debug
-    printf("%d\n", K_ridge.ram.size());
+    printf("%lu\n", K_ridge.ram.size());
     for(unsigned int i = 0; i < K_ridge.ram.size(); i = i + 1){
         printf("%d", K_ridge.ram[i]);
     }
@@ -321,12 +321,12 @@ void cartridge::write_save_file(std::string fname){
 }
 
 
-int main(){
-    cartridge cartridge;
-    //struct cartridge::Kartridge hoge;    
-    cartridge.Nnew("instr_timing.gb");
+// int main(){
+//     cartridge cartridge;
+//     //struct cartridge::Kartridge hoge;    
+//     cartridge.Nnew("instr_timing.gb");
 
-    //printf("mbc_type : %d", hoge.mbc_type);
-    return 0;
+//     //printf("mbc_type : %d", hoge.mbc_type);
+//     return 0;
     
-}
+// }

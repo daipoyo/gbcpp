@@ -1,3 +1,4 @@
+#pragma once
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -504,17 +505,17 @@ void render::update(unsigned int tick){
 }
 
 
-int main(){
-	read_rom rom;
-	render render;
-	std::string filename = "test";
-	rom.fetch(filename);
-	int a, b;
-	//std::tie(a,b) = render.fetch_tile(80, 0, false);
-	//std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
-	//std::cout << a << ", " << b << std::endl;
-	int c = 2;
-	if(3 <= c){
-		printf("AAA");
-	}
-}
+// int main(){
+// 	read_rom rom;
+// 	render render;
+// 	std::string filename = "test";
+// 	rom.fetch(filename);
+// 	int a, b;
+// 	//std::tie(a,b) = render.fetch_tile(80, 0, false);
+// 	//std::tie(a,b) = render.fetch_bg_tile(10, 10, 5);
+// 	//std::cout << a << ", " << b << std::endl;
+// 	int c = 2;
+// 	if(3 <= c){
+// 		printf("AAA");
+// 	}
+// }

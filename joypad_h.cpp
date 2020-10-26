@@ -1,3 +1,4 @@
+#pragma once
 #include "io_device.cpp"
 
 class joypad : public io_device{

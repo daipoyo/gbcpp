@@ -1,5 +1,14 @@
-#include <SDL2/SDL.h>
 #include <stdio.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include "cartridge.cpp"
+#include "cpu.cpp"
+#include "io_device.cpp"
+#include "joypad.cpp"
+#include "mmu.cpp"
+#include "ppu.cpp"
+#include "timer.cpp"
+
 
 int main(int argc, char* argv[]) {
 

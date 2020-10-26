@@ -1,6 +1,7 @@
+#pragma once
 #include <string>
 #include <iostream>
-#include <windows.h>
+//#include <windows.h>
 #include "timer_h.cpp"
 
 void timer::write(unsigned int addr, unsigned short val){

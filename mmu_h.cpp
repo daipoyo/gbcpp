@@ -5,8 +5,6 @@
 
 class mmu : public io_device{
 public:
-    int ram[0x2000];
-    int hram[0x7f];
     int int_flag;
     int int_enable;
     void do_dma(int val);
@@ -17,4 +15,7 @@ public:
     //unsigned int read(int addr);
     //void update(int tick);
 
+private:
+    int ram[0x2000];
+    int hram[0x7f];
 };

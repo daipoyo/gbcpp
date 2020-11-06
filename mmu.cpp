@@ -1,12 +1,13 @@
 #pragma once
 #include "mmu_h.cpp"
 #include "ppu.cpp"
-//#include "cartridge.cpp"
-//#include "joypad.cpp"
+#include "cartridge.cpp"
+#include "joypad.cpp"
 #include "timer.cpp"
 render render;
 timer timer;
-
+cartridge cartridge;
+joypad joypad;
 
 void mmu::do_dma(int val){
 	if(val < 0x80 || 0xdf < val){
@@ -23,19 +24,16 @@ void mmu::do_dma(int val){
 }
 
 void mmu::write(unsigned int addr, unsigned short val){
-	
 
 	switch(addr){
 		case 0x0000 ... 0x7FFF:
-			//cartridge.write(addr, val);
-			printf("After Cartridge");
+			cartridge.write(addr, val);
 			break;
 		case 0x8000 ... 0x9FFF:
 			render.write(addr, val);
 			break;
 		case 0xA000 ... 0xBFFF:
-			//cartridge.write(addr, val);
-			printf("After Cartridge");
+			cartridge.write(addr, val);
 			break;
 		case 0xC000 ... 0xDFFF:
 			ram[addr & 0x1fff] = val;
@@ -47,8 +45,7 @@ void mmu::write(unsigned int addr, unsigned short val){
 			render.write(addr, val);
 			break;
 		case 0xFF00:
-			//joypad.write(addr, val);
-			printf("After joypad");
+			joypad.write(addr, val);
 			break;
 		case 0xFF04 ... 0xFF07:
 			timer.write(addr, val);
@@ -63,6 +60,8 @@ void mmu::write(unsigned int addr, unsigned short val){
 		case 0xFF46:
 			do_dma(val);
 			break;
+		case 0xFF80 ... 0xFFFE:
+			hram(addr & 0x7F) = val;
 		case 0xFFFF:
 			int_enable = val;
 			break;
@@ -152,6 +151,6 @@ void mmu::update(unsigned int tick){
 
 }
 
-/*int main(){
+int main(){
 	
-}*/
+}

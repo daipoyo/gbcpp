@@ -1,3 +1,4 @@
+#pragma once
 #include "io_device.cpp"
 #include "cartridge_h.cpp"
 #include <iomanip>
@@ -320,13 +321,70 @@ void cartridge::write_save_file(std::string fname){
     outputFile.close();
 }
 
+void cartridge::write(unsigned int addr, unsigned short val){
 
-// int main(){
-//     cartridge cartridge;
-//     //struct cartridge::Kartridge hoge;    
-//     cartridge.Nnew("instr_timing.gb");
+    unsigned int offset = (8 + 1024) * ram_bank_no();
 
-//     //printf("mbc_type : %d", hoge.mbc_type);
-//     return 0;
-    
-// }
+    switch(addr){
+        case 0x0000 ... 0x1FFF:
+            K_ridge.ram_enable = (val & 0x0F) == 0x0A;
+            break;
+        case 0x2000 ... 0x3FFF:
+            K_ridge.bank_no_lower = (val & 0x1F);
+            break;
+        case 0x4000 ... 0x5FFF:
+            K_ridge.bank_no_upper = (val & 0x03);
+            break;
+        case 0x6000 ... 0x7FFF:
+            K_ridge.mode = (val & 0x01) > 0;
+            break;
+        case 0xA000 ... 0xBFFF:
+            if(!K_ridge.ram_enable){
+                return;
+            }
+            K_ridge.ram[(addr + 0x1FFF) + offset] = val;
+            break;
+        default:
+            printf("Unexpected address: 0x%04x\n", addr);
+            break;
+    }
+}
+
+unsigned int cartridge::read(unsigned int addr, unsigned short val){
+
+    unsigned int temp;
+    unsigned int offset = (16 * 1024) * ram_bank_no();
+    unsigned int offset2 = (8 * 1024) * ram_bank_no();
+
+    switch(addr){
+        case 0x0000 ... 0x3FFF:
+            temp = K_ridge.rom[addr];
+            break;
+        case 0x4000 ... 0x7FFF:
+            temp = K_ridge.rom[(addr & 0x3FFF) + offset];
+            break;
+        case 0xA000 ... 0xBFFF:
+            if(!K_ridge.ram_enable){
+                return 0xFF;
+            }
+            temp = K_ridge.ram[(addr & 0x1FFF) + offset2];
+            break;
+        default:
+            printf("Unexpected address: 0x%04x\n", addr);
+            break;
+    }
+
+    return temp;
+}
+
+void cartridge::update(unsigned int tick){}
+
+
+/*int main(){
+    cartridge cartridge;
+    //struct cartridge::Kartridge hoge;    
+    cartridge.Nnew("instr_timing.gb");
+
+    //printf("mbc_type : %d", hoge.mbc_type);
+    return 0;   
+}*/

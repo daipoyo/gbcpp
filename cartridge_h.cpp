@@ -1,7 +1,9 @@
+#pragma once
 #include <vector>
 #include <string>
+#include "io_device.cpp"
 
-class cartridge{
+class cartridge : public io_device{
 public:
 	struct Kartridge{
 		std::vector<unsigned short> rom;
@@ -20,8 +22,9 @@ public:
 	struct Kartridge Nnew(std::string fname);
 	void read_save_file(std::string fname);
 	void write_save_file(std::string fname);
-
-
+	void write(unsigned int addr, unsigned short val) override;
+	unsigned int read(unsigned int addr, unsigned short val) override;
+	void update(unsigned int tick) override;
 
 private:
 	unsigned char rom_bank_no();

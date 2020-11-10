@@ -9,9 +9,9 @@
 #include "ppu.cpp"
 #include "timer.cpp"
 
-joypad joypad;
+//joypad joypad;
 
-enum joypad.Key translate_keycode()
+//enum joypad.Key translate_keycode()
 
 
 int main(int argc, char* argv[]) {

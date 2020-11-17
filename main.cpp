@@ -12,7 +12,9 @@
 
 cpu cpu;
 
-std::optional<joypad::Key> translate_keycode(SDL_Keycode key){
+// Translates keycode to `joypad::Key` enum.
+//std::optional<joypad::Key> translate_keycode(SDL_Keycode key){
+joypad::Key translate_keycode(SDL_Keycode key){
     
     joypad::Key temp;
 
@@ -48,6 +50,15 @@ std::optional<joypad::Key> translate_keycode(SDL_Keycode key){
     return temp;
 }
 
+// Handles key down event.
+void handle_keydown(SDL_Keycode key){
+    joypad.keydown(translate_keycode(key));
+}
+
+// Handles key up event.
+void handle_keyup(SDL_Keycode key){
+    joypad.keyup(translate_keycode(key));
+}
 
 int main(int argc, char* argv[]) {
 
@@ -60,8 +71,8 @@ int main(int argc, char* argv[]) {
         "CameBoyz SDL2 window",             // ウィンドウのタイトル
         SDL_WINDOWPOS_UNDEFINED,           // X座標の初期値
         SDL_WINDOWPOS_UNDEFINED,           // Y座標の初期値
-        640,                               // 幅のピクセル数
-        480,                               // 高さのピクセル数
+        320,                               // 幅のピクセル数
+        288,                               // 高さのピクセル数
         SDL_WINDOW_OPENGL                  // フラグ
     );
 

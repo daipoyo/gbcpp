@@ -20,9 +20,9 @@ public:
     unsigned short step();
     void dump();
 
-    int af();
 
 private:
+    int af();
     void set_af(int val);
     int bc();
     void set_bc(int val);

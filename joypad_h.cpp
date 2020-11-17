@@ -20,7 +20,7 @@ public:
 	void keydown(enum Key direction);
 	void keyup(enum Key direction);
     void write(unsigned int addr, unsigned short val) override;
-	unsigned int read(unsigned int addr);
+	unsigned int read(unsigned int addr, unsigned short val) override;
     void update(unsigned int tick) override;
 
 private:

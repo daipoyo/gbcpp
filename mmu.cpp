@@ -61,7 +61,7 @@ void mmu::write(unsigned int addr, unsigned short val){
 			do_dma(val);
 			break;
 		case 0xFF80 ... 0xFFFE:
-			hram(addr & 0x7F) = val;
+			hram[addr & 0x7F] = val;
 		case 0xFFFF:
 			int_enable = val;
 			break;
@@ -151,6 +151,6 @@ void mmu::update(unsigned int tick){
 
 }
 
-int main(){
+/*int main(){
 	
-}
+}*/

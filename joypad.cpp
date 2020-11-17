@@ -73,7 +73,7 @@ void joypad::write(unsigned int addr, unsigned short val){
 	}
 }
 
-unsigned int joypad::read(unsigned int addr){
+unsigned int joypad::read(unsigned int addr, unsigned short val){
 	unsigned int temp = 0;
 	switch(addr){
 		case 0xFF00:

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <optional>
 #include "cartridge.cpp"
 #include "cpu.cpp"
 #include "io_device.cpp"
@@ -9,9 +10,43 @@
 #include "ppu.cpp"
 #include "timer.cpp"
 
-//joypad joypad;
+cpu cpu;
 
-//enum joypad.Key translate_keycode()
+std::optional<joypad::Key> translate_keycode(SDL_Keycode key){
+    
+    joypad::Key temp;
+
+    switch(key){
+        case SDLK_DOWN:
+            temp = joypad::Key::Down;
+            break;
+        case SDLK_UP:
+            temp = joypad::Key::Up;
+            break;
+        case SDLK_LEFT:
+            temp = joypad::Key::Left;
+            break;
+        case SDLK_RIGHT:
+            temp = joypad::Key::Right;
+            break;
+        case SDLK_RETURN:
+            temp = joypad::Key::Start;
+            break;
+        case SDLK_SPACE:
+            temp = joypad::Key::Select;
+            break;
+        case SDLK_z:
+            temp = joypad::Key::A;
+            break;
+        case SDLK_x:
+            temp = joypad::Key::B;
+            break;
+        default:
+            break;
+    }
+
+    return temp;
+}
 
 
 int main(int argc, char* argv[]) {
@@ -22,7 +57,7 @@ int main(int argc, char* argv[]) {
 
     // 次の設定でアプリケーションウィンドウを生成する:
     window = SDL_CreateWindow(
-        "An SDL2 window",                  // ウィンドウのタイトル
+        "CameBoyz SDL2 window",             // ウィンドウのタイトル
         SDL_WINDOWPOS_UNDEFINED,           // X座標の初期値
         SDL_WINDOWPOS_UNDEFINED,           // Y座標の初期値
         640,                               // 幅のピクセル数
@@ -39,7 +74,7 @@ int main(int argc, char* argv[]) {
 
     // ウィンドウが開いた: ここでプログラムループに入る (SDL_PollEvent()を参照すること)
 
-    SDL_Delay(3000);  // 例として3000ミリ秒間停止する
+    SDL_Delay(10000);  // 例として10000ミリ秒間停止する
 
     // ウィンドウを閉じて破棄する
     SDL_DestroyWindow(window);

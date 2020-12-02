@@ -10,6 +10,16 @@
 #include "ppu.cpp"
 #include "timer.cpp"
 
+//例外処理用
+class some_exception
+{
+private:
+    const char* msg;   // 例外を説明するメッセージ
+public:
+    some_exception(const char* msg) : msg(msg) { }  // コンストラクタ
+    const char* what() { return msg; }  // メッセージを返す
+};
+
 cpu cpu;
 
 // Translates keycode to `joypad::Key` enum.
@@ -58,6 +68,27 @@ void handle_keydown(SDL_Keycode key){
 // Handles key up event.
 void handle_keyup(SDL_Keycode key){
     joypad.keyup(translate_keycode(key));
+}
+
+std::string rom_fname(int argc, char *argv[]){
+      
+    std::string fname = argv[1];
+
+    try{
+        if(fname.empty() == 0){
+            throw some_exception("Erorr@romname arguement");
+        } 
+    }
+    catch (some_exception e) {
+        std::cerr << "some_exception: " << e.what() << std::endl;
+    }
+    catch (...)  // その他の例外をキャッチ
+    {
+        std::cerr << "unknown exeption" << std::endl;
+    }
+
+    return 0;
+
 }
 
 int main(int argc, char* argv[]) {

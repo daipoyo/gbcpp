@@ -70,6 +70,7 @@ void handle_keyup(SDL_Keycode key){
     joypad.keyup(translate_keycode(key));
 }
 
+// Returns ROM filename.
 std::string rom_fname(int argc, char *argv[]){
       
     std::string fname = argv[1];
@@ -77,7 +78,9 @@ std::string rom_fname(int argc, char *argv[]){
     try{
         if(fname.empty() == 0){
             throw some_exception("Erorr@romname arguement");
-        } 
+        }else{
+            return fname;
+        }
     }
     catch (some_exception e) {
         std::cerr << "some_exception: " << e.what() << std::endl;
@@ -91,6 +94,18 @@ std::string rom_fname(int argc, char *argv[]){
 
 }
 
+// Returns save filename for current ROM.
+std::string save_fname(int argc, char *argv[]){
+
+    std::string path_buf = rom_fname(argc, argv);
+    int path_i = path_buf.find_last_of(".");
+    std::string path_buf2 = path_buf.substr(0, path_i).append(".sav");
+
+    return path_buf2;
+}
+
+
+
 int main(int argc, char* argv[]) {
 
     SDL_Window *window;                    // ポインタを宣言する
@@ -99,7 +114,7 @@ int main(int argc, char* argv[]) {
 
     // 次の設定でアプリケーションウィンドウを生成する:
     window = SDL_CreateWindow(
-        "CameBoyz SDL2 window",             // ウィンドウのタイトル
+        "CameBoyz SDL2 window",            // ウィンドウのタイトル
         SDL_WINDOWPOS_UNDEFINED,           // X座標の初期値
         SDL_WINDOWPOS_UNDEFINED,           // Y座標の初期値
         320,                               // 幅のピクセル数
